@@ -1,7 +1,7 @@
 """Model loading and management."""
 from typing import Tuple
 
-from config import settings
+from config import settings, IS_DEV
 
 
 class ModelManager:
@@ -27,22 +27,33 @@ class ModelManager:
         """
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
+        import torch
+
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(
             self.model_id, trust_remote_code=True
         )
 
-        # Determine device settings
-        if settings.DEVICE != "cpu":
-            # Use auto device mapping and dtype for GPU/multi-GPU
+        # Determine device settings based on dev mode and settings
+        if IS_DEV:
+            print("[DEV MODE] Using lightweight CPU-optimized model config")
             model = AutoModelForCausalLM.from_pretrained(
                 self.model_id,
                 trust_remote_code=True,
-                torch_dtype="auto",
-                device_map="auto",
+                device_map="cpu",
+                torch_dtype=torch.float16,
+                low_cpu_mem_usage=True,
+            )
+        elif settings.DEVICE != "cpu":
+            print("[PROD MODE] Using full model configuration with GPU")
+            model = AutoModelForCausalLM.from_pretrained(
+                self.model_id,
+                trust_remote_code=True,
+                torch_dtype=torch.float16 if torch.cuda.is_available() else "auto",
+                device_map="cuda" if torch.cuda.is_available() else "auto",
             )
         else:
-            # Load on CPU
+            print("[PROD MODE] Using standard CPU configuration")
             model = AutoModelForCausalLM.from_pretrained(
                 self.model_id,
                 trust_remote_code=True,

@@ -1,5 +1,5 @@
 """API package."""
-from .routes import app, create_app
+from .routes import app
 
-__all__ = ["app", "create_app"]
+__all__ = ["app"]
 

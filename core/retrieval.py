@@ -2,8 +2,18 @@
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from langchain.docstore.document import Document
-from langchain.vectorstores import Chroma
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
+
+try:
+    from langchain_community.vectorstores import Chroma
+except ImportError:
+    from langchain.vectorstores import Chroma
 
 from config import settings
 from core.embeddings import EmbeddingModel

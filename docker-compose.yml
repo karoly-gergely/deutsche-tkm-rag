@@ -1,22 +1,75 @@
+version: "3.9"
+
 services:
   rag-ui:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deutsche-rag-ui
+    command: poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8501:8501"
-    volumes:
-      - ./.chroma:/app/.chroma
-      - ./data:/app/data
     env_file:
       - .env
+    volumes:
+      - ./data:/app/data
+      - ./.chroma:/app/.chroma
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/?health=true"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
 
   rag-api:
-    build: .
-    command: uvicorn api.routes:app --host 0.0.0.0 --port 8080
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deutsche-rag-api
+    command: poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080
     ports:
       - "8080:8080"
-    volumes:
-      - ./.chroma:/app/.chroma
-      - ./data:/app/data
     env_file:
       - .env
+    volumes:
+      - ./data:/app/data
+      - ./.chroma:/app/.chroma
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - rag-ui
+    restart: unless-stopped
 
+  rag-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deutsche-rag-worker
+    command: poetry run python scripts/ingest.py
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./.chroma:/app/.chroma
+      - ./logs:/app/logs
+    depends_on:
+      rag-api:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - worker
+    # Disabled by default - enable with:
+    #   docker-compose --profile worker up rag-worker
+    #   or: make docker && docker-compose up rag-worker
+
+volumes:
+  data:
+  chroma:
+  logs:

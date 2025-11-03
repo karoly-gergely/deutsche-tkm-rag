@@ -3,7 +3,14 @@ import hashlib
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
-from langchain.docstore.document import Document
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    # Fallback for older langchain versions
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
 
 try:
     from langchain.text_splitter import RecursiveCharacterTextSplitter

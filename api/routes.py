@@ -6,10 +6,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from config import settings
+from config import settings, IS_DEV
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
-from langchain.vectorstores import Chroma
+
+try:
+    from langchain_community.vectorstores import Chroma
+except ImportError:
+    from langchain.vectorstores import Chroma
+
 from llm.generation import generate_response
 from llm.model_manager import ModelManager
 from llm.prompt_manager import PromptManager
@@ -132,6 +137,13 @@ class HealthResponse(BaseModel):
     sizes: Dict[str, Optional[int]]
 
 
+@app.get("/health")
+async def health_simple():
+    """Simple health check endpoint."""
+    from fastapi.responses import JSONResponse
+    return JSONResponse(content={"status": "ok"}, status_code=200)
+
+
 @app.get("/healthz", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint with system sizes."""
@@ -210,16 +222,31 @@ async def query(request: QueryRequest):
             query=request.query, context_docs=retrieved_docs, chat_history=None
         )
 
-        # Generate response
-        answer = generate_response(
-            tokenizer=tokenizer,
-            model=model,
-            prompt=prompt,
-            max_new_tokens=settings.MAX_NEW_TOKENS,
-            temperature=settings.TEMPERATURE,
-            top_p=settings.TOP_P,
-            device=settings.DEVICE,
-        )
+        # Adaptive generation parameters based on dev mode
+        if IS_DEV:
+            max_tokens = 128
+            temperature = 0.8
+            top_p = 0.9
+        else:
+            max_tokens = settings.MAX_NEW_TOKENS
+            temperature = settings.TEMPERATURE
+            top_p = settings.TOP_P
+
+        # Generate response (use threadpool for non-blocking execution)
+        from starlette.concurrency import run_in_threadpool
+
+        def _generate():
+            return generate_response(
+                tokenizer=tokenizer,
+                model=model,
+                prompt=prompt,
+                max_new_tokens=max_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                device=settings.DEVICE,
+            )
+
+        answer = await run_in_threadpool(_generate)
 
         # Extract publication IDs from sources
         publication_ids = []

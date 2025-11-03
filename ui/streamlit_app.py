@@ -5,13 +5,29 @@ from pathlib import Path
 
 import streamlit as st
 
+if st.query_params.get("health") is not None:
+    st.write("ok")
+    st.stop()
+
 from config import settings
 from core.chunking import MetadataAwareChunker
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
-from data.loader import DocumentLoader
-from langchain.docstore.document import Document
-from langchain.vectorstores import Chroma
+from loaders.loader import DocumentLoader
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    # Fallback for older langchain versions
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
+
+try:
+    from langchain_community.vectorstores import Chroma
+except ImportError:
+    from langchain.vectorstores import Chroma
+
 from llm.generation import generate_response, generate_response_streaming
 from llm.model_manager import ModelManager
 from llm.prompt_manager import PromptManager

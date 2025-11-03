@@ -4,7 +4,14 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 
 from api.routes import app
-from langchain.docstore.document import Document
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    # Fallback for older langchain versions
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
 
 
 def test_healthz():

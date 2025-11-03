@@ -1,4 +1,4 @@
-from .settings import Settings, settings
+from .settings import Settings, IS_DEV, settings
 
-__all__ = ["Settings", "settings"]
+__all__ = ["Settings", "settings", "IS_DEV"]
 

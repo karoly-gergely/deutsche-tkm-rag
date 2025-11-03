@@ -8,12 +8,15 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from langchain.vectorstores import Chroma
+try:
+    from langchain_community.vectorstores import Chroma
+except ImportError:
+    from langchain.vectorstores import Chroma
 
 from config import settings
 from core.chunking import MetadataAwareChunker
 from core.embeddings import get_embeddings
-from data.loader import DocumentLoader
+from loaders.loader import DocumentLoader
 from monitoring.logging import setup_logging
 
 logger = setup_logging()

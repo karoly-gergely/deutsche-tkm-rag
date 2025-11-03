@@ -1,6 +1,44 @@
+import os
+import socket
 from pydantic_settings import BaseSettings
 
 from typing import Optional
+
+
+def is_dev_environment() -> bool:
+    """Detect if running in development mode.
+
+    Checks various indicators:
+    - COMPOSE_PROJECT_NAME ending with '-dev'
+    - HOSTNAME containing 'dev'
+    - DEV_MODE environment variable
+    - Container hostname starting with 'dev-'
+    - Presence of /app/.dev marker file
+
+    Returns:
+        True if dev mode detected, False otherwise.
+    """
+    if os.getenv("DEV_MODE") == "true":
+        return True
+
+    compose_project = os.getenv("COMPOSE_PROJECT_NAME", "")
+    if compose_project.endswith("-dev"):
+        return True
+
+    hostname = os.getenv("HOSTNAME", "")
+    if "dev" in hostname.lower():
+        return True
+
+    try:
+        if socket.gethostname().startswith("dev-"):
+            return True
+    except Exception:
+        pass
+
+    return False
+
+
+IS_DEV = is_dev_environment()
 
 
 class Settings(BaseSettings):
@@ -44,4 +82,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+if IS_DEV:
+    print("[DEV MODE] Development environment detected - applying CPU optimizations")
 

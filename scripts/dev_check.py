@@ -83,7 +83,10 @@ def print_chroma_status():
         
         # Try to get collection count if ChromaDB is initialized
         try:
-            from langchain.vectorstores import Chroma
+            try:
+                from langchain_community.vectorstores import Chroma
+            except ImportError:
+                from langchain.vectorstores import Chroma
             from core.embeddings import get_embeddings
             
             embeddings = get_embeddings()

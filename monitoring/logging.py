@@ -8,7 +8,14 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from config import settings
-from langchain.docstore.document import Document
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    # Fallback for older langchain versions
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
 
 
 class JSONFormatter(logging.Formatter):

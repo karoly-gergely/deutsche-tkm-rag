@@ -4,9 +4,16 @@ import os
 from pathlib import Path
 from typing import List
 
-from langchain.docstore.document import Document
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    # Fallback for older langchain versions
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
 
-from data.metadata import MetadataExtractor
+from loaders.metadata import MetadataExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +83,7 @@ class DocumentLoader:
         return sorted(txt_files)
 
     def load_all_documents(self) -> List[Document]:
-        """Load all .txt documents from data folder with metadata.
+        """Load all .txt documents from loaders folder with metadata.
 
         Reads all *.txt files in DATA_FOLDER, skips empty files,
         and attaches publication metadata via MetadataExtractor.

@@ -1,7 +1,14 @@
 """Prompt template management."""
 from typing import List
 
-from langchain.docstore.document import Document
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    # Fallback for older langchain versions
+    try:
+        from langchain.docstore.document import Document
+    except ImportError:
+        from langchain.schema import Document
 
 
 class PromptManager:

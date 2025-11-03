@@ -198,6 +198,8 @@ Before deploying to production, ensure the following security and hardening meas
 - [ ] **Rotate secrets regularly**: Implement a rotation policy for API keys, database passwords, and authentication tokens
 - [ ] **Review `.env` files**: Ensure `.env` is in `.gitignore` and never committed to version control
 - [ ] **Use separate configs**: Maintain separate configuration for development, staging, and production environments
+- [ ] **Poetry lockfile integrity**: Ensure `poetry.lock` is committed and consistent with `pyproject.toml` to guarantee reproducible builds
+- [ ] **Environment schema validation**: Add a startup check using Pydantic BaseSettings to validate required environment variables are present (e.g. `MODEL_ID`, `DATA_FOLDER`, `CHROMA_DIR`)
 
 ### 📊 Monitoring & Observability
 
@@ -206,6 +208,7 @@ Before deploying to production, ensure the following security and hardening meas
 - [ ] **Centralized logging**: Configure log aggregation to ELK stack, OpenSearch, or cloud logging service (CloudWatch, Stackdriver)
 - [ ] **Alerting**: Set up alerts for error rates, latency spikes, cost overruns, and system health issues
 - [ ] **Dashboard**: Create monitoring dashboards for real-time visibility into system performance
+- [ ] **Startup health verification**: Automatically run `curl -f http://localhost:8080/healthz` and `curl -f http://localhost:8501/?health=true` as part of deployment health checks
 
 ### 🛡️ API Security & Rate Limiting
 
@@ -263,6 +266,8 @@ Before deploying to production, ensure the following security and hardening meas
   USER 1001
   ```
 - [ ] **Minimal base image**: Use minimal base images (python:3.11-slim) and remove unnecessary packages
+- [ ] **Multi-stage build optimization**: Use a two-stage Docker build (builder → runtime) to reduce final image size and attack surface
+- [ ] **Read-only filesystem**: Add `read_only: true` in production Compose deployment for immutable container filesystems
 - [ ] **Security scanning**: Run vulnerability scans on container images:
   ```bash
   # Using trivy
@@ -283,6 +288,7 @@ Before deploying to production, ensure the following security and hardening meas
 - [ ] **Embedding cache**: Cache document embeddings to avoid recomputation
 - [ ] **Response cache**: Cache responses for identical queries (with appropriate invalidation strategy)
 - [ ] **Database optimization**: Optimize ChromaDB queries and index maintenance
+- [ ] **Persistent volume checks**: Verify `data/` and `.chroma/` volumes exist and are writable before application startup
 
 ### 🔒 Additional Security Measures
 
@@ -295,7 +301,8 @@ Before deploying to production, ensure the following security and hardening meas
 ### 📋 CI/CD Pipeline
 
 - [ ] **Automated builds**: Set up CI to build and test on every commit
-- [ ] **Dependency caching**: Cache pip dependencies in CI to speed up builds
+- [ ] **Poetry install verification**: Include a CI step to run `poetry check && poetry install --no-root --no-interaction` to validate dependency integrity before build
+- [ ] **Dependency caching**: Cache Poetry dependencies in CI to speed up builds
 - [ ] **Vulnerability scanning**: Run `pip-audit` and `trivy` scans as part of CI pipeline
 - [ ] **Automated deployment**: Configure automated deployment to staging/production with manual approval gates
 - [ ] **Rollback strategy**: Establish rollback procedures for failed deployments
