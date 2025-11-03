@@ -2,7 +2,7 @@
 name = "deutsche-telekom-rag"
 version = "0.1.0"
 description = "Retrieval-Augmented Generation assistant for Deutsche Telekom press releases"
-authors = ["Karoly Gergely <your.email@example.com>"]
+authors = ["Karoly Gergely <karolygergely86@gmail.com>"]
 readme = "README.md"
 packages = [{include = "config"}, {include = "core"}, {include = "data"}, {include = "llm"}, {include = "monitoring"}, {include = "api"}, {include = "ui"}, {include = "scripts"}, {include = "tests"}]
 
@@ -29,6 +29,7 @@ pytest = ">=8.3"
 ruff = "*"
 black = "*"
 isort = "*"
+accelerate = ">=0.30"
 
 [tool.black]
 line-length = 100

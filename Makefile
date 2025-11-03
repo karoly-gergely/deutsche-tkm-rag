@@ -1,4 +1,4 @@
-.PHONY: venv install ingest ui api test fmt lint rebuild-index dev-check up down rebuild deps-install deps-update deps-lock worker dev health ps logs shell shell-ui react-setup react-install react-dev react-build react-lint react-preview audit-react
+.PHONY: venv install ingest ui api test fmt lint rebuild-index dev-check up down rebuild deps-install deps-update deps-lock worker dev rebuild-dev health ps logs shell shell-ui react-setup react-install react-dev react-build react-lint react-preview audit-react
 
 # ==========================================================
 # Docker lifecycle commands
@@ -18,6 +18,12 @@ rebuild:
 
 dev:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+rebuild-dev:
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down --remove-orphans
+	docker builder prune -f
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 # ==========================================================
 # Docker utility commands

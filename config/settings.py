@@ -12,8 +12,7 @@ def is_dev_environment() -> bool:
     - COMPOSE_PROJECT_NAME ending with '-dev'
     - HOSTNAME containing 'dev'
     - DEV_MODE environment variable
-    - Container hostname starting with 'dev-'
-    - Presence of /app/.dev marker file
+    - Container hostname ends with '-dev'
 
     Returns:
         True if dev mode detected, False otherwise.
@@ -30,7 +29,7 @@ def is_dev_environment() -> bool:
         return True
 
     try:
-        if socket.gethostname().startswith("dev-"):
+        if socket.gethostname().endswith("-dev"):
             return True
     except Exception:
         pass
@@ -43,6 +42,9 @@ IS_DEV = is_dev_environment()
 
 class Settings(BaseSettings):
     MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct"
+
+    # DEV_MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct-GGUF" GGUF files are not Hugging Face Transformers checkpoints so can't be used with AutoModelForCausalLM.from_pretrained
+    DEV_MODEL_ID: str = "Qwen/Qwen2.5-1.5B-Instruct"
 
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 

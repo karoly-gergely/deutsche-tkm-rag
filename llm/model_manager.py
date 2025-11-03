@@ -13,7 +13,10 @@ class ModelManager:
         Args:
             model_id: Model identifier. Defaults to settings value.
         """
-        self.model_id = model_id or settings.MODEL_ID
+        if IS_DEV:
+            self.model_id = model_id or settings.DEV_MODEL_ID
+        else:
+            self.model_id = model_id or settings.MODEL_ID
 
     def load_model(self) -> Tuple:
         """Load tokenizer and model.
@@ -41,7 +44,7 @@ class ModelManager:
                 self.model_id,
                 trust_remote_code=True,
                 device_map="cpu",
-                torch_dtype=torch.float16,
+                dtype=torch.float32,
                 low_cpu_mem_usage=True,
             )
         elif settings.DEVICE != "cpu":

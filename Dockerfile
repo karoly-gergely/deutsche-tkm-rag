@@ -19,14 +19,23 @@ ENV POETRY_VIRTUALENVS_CREATE=false \
     PYTHONUNBUFFERED=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+# Build argument to control dev dependency installation
+ARG INSTALL_DEV_DEPS=false
+
 # Copy Poetry configuration files first for better layer caching
 COPY pyproject.toml ./
 # Copy poetry.lock if it exists (will be included in COPY . . below if present)
 # If missing, Poetry will generate it during install
 
-# Install dependencies (will generate poetry.lock if missing)
-# Install package in editable mode so imports work correctly
-RUN poetry install --no-ansi && rm -rf $POETRY_CACHE_DIR
+# Install dependencies conditionally based on build arg
+# Production: --no-dev excludes dev dependencies
+# Development: includes dev dependencies (accelerate, etc.)
+RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
+        poetry install --no-ansi; \
+    else \
+        poetry install --no-dev --no-ansi; \
+    fi && \
+    rm -rf $POETRY_CACHE_DIR
 
 # Copy application code
 COPY . .

@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-ui
     command: poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
     ports:
@@ -27,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-api
     command: poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080
     ports:
@@ -51,6 +55,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-worker
     command: poetry run python scripts/ingest.py
     env_file:
