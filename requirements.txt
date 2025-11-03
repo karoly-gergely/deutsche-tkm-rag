@@ -1,0 +1,16 @@
+streamlit>=1.35
+transformers>=4.43
+torch>=2.3
+langchain>=0.2
+langchain-community>=0.2
+chromadb>=0.5
+sentence-transformers>=3.0
+pydantic-settings>=2.2
+faiss-cpu>=1.8
+fastapi>=0.115
+uvicorn[standard]>=0.30
+opentelemetry-sdk>=1.26
+opentelemetry-instrumentation-fastapi>=0.47b0
+pytest>=8.3
+pypdf>=4.0.0
+

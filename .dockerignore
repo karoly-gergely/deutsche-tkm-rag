@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
+
+# ChromaDB (will be mounted as volume)
+.chroma/
+
+# Data (will be mounted as volume)
+data/
+
+# Temporary files
+*.tmp
+*.bak
+
