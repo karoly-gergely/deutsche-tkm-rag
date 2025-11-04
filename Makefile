@@ -1,39 +1,53 @@
-.PHONY: venv install ingest ui api test fmt lint rebuild-index dev-check up down rebuild deps-install deps-update deps-lock worker dev rebuild-dev health ps logs shell shell-ui react-setup react-install react-dev react-build react-lint react-preview audit-react
+.PHONY: venv install ingest ui api test fmt lint rebuild-index dev-check up down rebuild clear publish deps-install deps-update deps-lock setup worker dev rebuild-dev health ps logs shell shell-ui react-setup react-install react-dev react-build react-lint react-preview audit-react
 
 # ==========================================================
 # Docker lifecycle commands
 # ==========================================================
 
 up:
-	docker-compose stop
-	docker-compose up -d
+	docker-compose -f docker/docker-compose.yml stop
+	docker-compose -f docker/docker-compose.yml up -d
 
 down:
-	docker-compose down --remove-orphans
+	docker-compose -f docker/docker-compose.yml down --remove-orphans
+
+clear:
+	docker-compose -f docker/docker-compose.yml down --remove-orphans
+	docker-compose -f docker/docker-compose.dev.yml down --remove-orphans
+	docker builder prune -f
+	docker image prune -f
+	docker volume prune -f
+	docker network prune -f
+	docker system prune -f
+	docker system df -v
 
 rebuild:
-	docker-compose down --remove-orphans
-	docker-compose up -d --build --force-recreate
+	docker-compose -f docker/docker-compose.yml down --remove-orphans
+	docker-compose -f docker/docker-compose.yml up -d --build --force-recreate
 	docker image prune -f
 
 dev:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	docker-compose -f docker/docker-compose.dev.yml up --build
 
 rebuild-dev:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down --remove-orphans
+	docker-compose -f docker/docker-compose.dev.yml down --remove-orphans
 	docker builder prune -f
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+	docker-compose -f docker/docker-compose.dev.yml build --no-cache
+	docker-compose -f docker/docker-compose.dev.yml up
+
+publish:
+	docker build -f docker/Dockerfile -t kg97/deutsche-telekom-rag:gpu .
+	docker push kg97/deutsche-telekom-rag:gpu
 
 # ==========================================================
 # Docker utility commands
 # ==========================================================
 
 ps:
-	docker-compose ps
+	docker-compose -f docker/docker-compose.yml ps
 
 logs:
-	docker-compose logs -f --tail=50
+	docker-compose -f docker/docker-compose.yml logs -f --tail=50
 
 shell:
 	@container=$$(docker ps --format '{{.Names}}' | grep 'rag-api' | head -n1); \
@@ -74,6 +88,9 @@ deps-lock:
 # ==========================================================
 # Project management commands
 # ==========================================================
+
+setup:
+	cp .env.example .env
 
 ingest:
 	poetry run python scripts/ingest.py

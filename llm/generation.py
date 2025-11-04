@@ -57,6 +57,7 @@ def generate_response(
     else:
         # CPU: ensure inputs and model are on CPU
         inputs = {k: v.to("cpu") for k, v in inputs.items()}
+        torch.set_num_threads(6)
         if hasattr(model, "to"):
             model = model.to("cpu")
 

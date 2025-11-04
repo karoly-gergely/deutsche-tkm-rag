@@ -9,7 +9,6 @@ def is_dev_environment() -> bool:
     """Detect if running in development mode.
 
     Checks various indicators:
-    - COMPOSE_PROJECT_NAME ending with '-dev'
     - HOSTNAME containing 'dev'
     - DEV_MODE environment variable
     - Container hostname ends with '-dev'
@@ -18,10 +17,6 @@ def is_dev_environment() -> bool:
         True if dev mode detected, False otherwise.
     """
     if os.getenv("DEV_MODE") == "true":
-        return True
-
-    compose_project = os.getenv("COMPOSE_PROJECT_NAME", "")
-    if compose_project.endswith("-dev"):
         return True
 
     hostname = os.getenv("HOSTNAME", "")
@@ -48,7 +43,7 @@ class Settings(BaseSettings):
 
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
-    DEVICE: str = "cpu"
+    DEVICE: str = "cpu" # cuda on GPU enabled machines
 
     CHUNK_SIZE: int = 500
 

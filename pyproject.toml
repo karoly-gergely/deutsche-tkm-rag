@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Retrieval-Augmented Generation assistant for Deutsche Telekom press releases"
 authors = ["Karoly Gergely <karolygergely86@gmail.com>"]
 readme = "README.md"
-packages = [{include = "config"}, {include = "core"}, {include = "data"}, {include = "llm"}, {include = "monitoring"}, {include = "api"}, {include = "ui"}, {include = "scripts"}, {include = "tests"}]
+packages = [{include = "config"}, {include = "core"}, {include = "loaders"}, {include = "llm"}, {include = "monitoring"}, {include = "api"}, {include = "ui"}, {include = "scripts"}, {include = "tests"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

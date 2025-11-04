@@ -47,6 +47,9 @@ class ModelManager:
                 dtype=torch.float32,
                 low_cpu_mem_usage=True,
             )
+            model = torch.quantization.quantize_dynamic(
+                model, {torch.nn.Linear}, dtype=torch.qint8
+            )
         elif settings.DEVICE != "cpu":
             print("[PROD MODE] Using full model configuration with GPU")
             model = AutoModelForCausalLM.from_pretrained(

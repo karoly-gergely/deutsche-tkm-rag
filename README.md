@@ -173,19 +173,32 @@ python scripts/rebuild_index.py --force
 ### Build and Run with Docker Compose
 
 ```bash
-docker-compose up --build
+docker-compose -f docker/docker-compose.yml up --build
+```
+
+Or use the Makefile:
+```bash
+make up
 ```
 
 This will:
 - Build the application image
-- Start the API server on port 8000
+- Start the API server on port 8080
 - Start the Streamlit UI on port 8501
+
+### Development Mode (CPU-only, hot-reload)
+
+```bash
+make dev
+# or
+docker-compose -f docker/docker-compose.dev.yml up --build
+```
 
 ### Dockerfile Only
 
 ```bash
-docker build -t rag-assistant .
-docker run -p 8000:8000 rag-assistant
+docker build -f docker/Dockerfile -t rag-assistant .
+docker run -p 8080:8080 -p 8501:8501 rag-assistant
 ```
 
 ## Production Checklist

@@ -3,8 +3,8 @@ version: "3.9"
 services:
   rag-ui:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-ui
@@ -12,23 +12,30 @@ services:
     ports:
       - "8501:8501"
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./data:/app/data
-      - ./.chroma:/app/.chroma
-      - ./logs:/app/logs
+      - ../data:/app/data
+      - ../.chroma:/app/.chroma
+      - ../logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8501/?health=true"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 15s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              driver: nvidia
+              count: 1
     restart: unless-stopped
 
   rag-api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-api
@@ -36,11 +43,11 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./data:/app/data
-      - ./.chroma:/app/.chroma
-      - ./logs:/app/logs
+      - ../data:/app/data
+      - ../.chroma:/app/.chroma
+      - ../logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
       interval: 30s
@@ -49,22 +56,29 @@ services:
       start_period: 10s
     depends_on:
       - rag-ui
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              driver: nvidia
+              count: 1
     restart: unless-stopped
 
   rag-worker:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-worker
     command: poetry run python scripts/ingest.py
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./data:/app/data
-      - ./.chroma:/app/.chroma
-      - ./logs:/app/logs
+      - ../data:/app/data
+      - ../.chroma:/app/.chroma
+      - ../logs:/app/logs
     depends_on:
       rag-api:
         condition: service_healthy

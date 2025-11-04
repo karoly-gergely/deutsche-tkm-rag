@@ -1,52 +1,57 @@
 version: "3.9"
 
-# Development override: mounts code for hot-reload
-# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Development configuration (CPU-only, no GPU)
+# Standalone file - does not merge with base docker-compose.yml
+# Usage: docker-compose -f docker/docker-compose.dev.yml up --build
 
 services:
   rag-ui:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        INSTALL_DEV_DEPS: "true"
+      context: ..
+      dockerfile: docker/Dockerfile.dev
     container_name: deutsche-rag-ui-dev
     hostname: deutsche-rag-ui-dev
     command: poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8501:8501"
     env_file:
-      - .env
+      - ../.env
     volumes:
       # Mount entire codebase for live editing
-      - ./:/app
+      - ../:/app
       # Keep persistent data separate
-      - ./data:/app/data
-      - ./.chroma:/app/.chroma
-      - ./logs:/app/logs
+      - ../data:/app/data
+      - ../.chroma:/app/.chroma
+      - ../logs:/app/logs
+    # Explicitly remove GPU requirements by setting empty deploy section
+    deploy:
+      resources: {}
     # Streamlit auto-reloads on file changes
     restart: unless-stopped
 
   rag-api:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        INSTALL_DEV_DEPS: "true"
+      context: ..
+      dockerfile: docker/Dockerfile.dev
     container_name: deutsche-rag-api-dev
     hostname: deutsche-rag-api-dev
     command: poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 --reload
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - ../.env
     volumes:
       # Mount entire codebase for live editing
-      - ./:/app
+      - ../:/app
       # Keep persistent data separate
-      - ./data:/app/data
-      - ./.chroma:/app/.chroma
-      - ./logs:/app/logs
+      - ../data:/app/data
+      - ../.chroma:/app/.chroma
+      - ../logs:/app/logs
+    # Explicitly remove GPU requirements by setting empty deploy section
+    deploy:
+      resources: {}
+    depends_on:
+      - rag-ui
     # FastAPI --reload enables auto-reload on file changes
     restart: unless-stopped
 
