@@ -43,6 +43,14 @@ RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
 # Copy application code
 COPY . .
 
+## SSL
+RUN mkdir -p /app/certs && \
+    openssl req -x509 -newkey rsa:4096 \
+      -keyout /app/certs/key.pem \
+      -out /app/certs/cert.pem \
+      -days 365 -nodes \
+      -subj "/CN=localhost"
+
 # Copy entrypoint script
 COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh

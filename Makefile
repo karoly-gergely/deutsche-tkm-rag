@@ -144,19 +144,20 @@ react-setup:
 	cd react && cp .env.example .env
 
 react-install:
+	npm install -g pnpm
 	cd react && pnpm install
 
 react-dev:
-	cd react && pnpm run dev
+	cd react && pnpm dev
 
 react-build:
-	cd react && pnpm run build
+	cd react && pnpm build
 
 react-lint:
-	cd react && pnpm run lint
+	cd react && pnpm lint
 
 react-preview:
-	cd react && pnpm run preview
+	cd react && pnpm preview
 
 audit-react:
 	@echo "🔍 Running react dependency audit..."
@@ -171,12 +172,12 @@ audit-react:
 	@echo "───────────────────────────────"
 	@echo "🔍 2️⃣  ESLint Check"
 	@echo "───────────────────────────────"
-	cd react && pnpm run lint 2>&1 | head -20 || true
+	cd react && pnpm lint 2>&1 | head -20 || true
 	@echo ""
 	@echo "───────────────────────────────"
 	@echo "🔍 3️⃣  TypeScript Type Check"
 	@echo "───────────────────────────────"
-	cd react && pnpm run type-check 2>&1 | head -20 || true
+	cd react && pnpm type-check 2>&1 | head -20 || true
 	@echo ""
 	@echo "───────────────────────────────"
 	@echo "🔍 4️⃣  UI Components Audit"

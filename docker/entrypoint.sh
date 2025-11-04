@@ -3,7 +3,7 @@ set -e
 
 # Start FastAPI backend
 echo "🚀 Starting FastAPI backend..."
-poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 &
+poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 --ssl-keyfile /app/certs/key.pem --ssl-certfile /app/certs/cert.pem &
 
 # Start Streamlit UI
 echo "🎨 Starting Streamlit frontend..."

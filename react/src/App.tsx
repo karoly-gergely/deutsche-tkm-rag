@@ -14,11 +14,15 @@ const queryClient = new QueryClient({
   },
 });
 
+const basename = import.meta.env.PROD
+  ? import.meta.env.VITE_BASENAME || "/deutsche-tkm-rag"
+  : "/";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="*" element={<NotFound />} />
