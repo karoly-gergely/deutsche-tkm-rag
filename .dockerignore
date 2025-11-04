@@ -1,0 +1,63 @@
+# ===============================
+# Dockerignore for Poetry-based RAG Project
+# ===============================
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+__pypackages__/
+
+# Poetry and pip caches
+.poetry/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.Python
+
+# IDE / editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and temp data
+logs/
+*.log
+*.tmp
+*.bak
+
+# Local persistent storage (mounted as volumes)
+data/
+.chroma/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# Environment configs
+.env
+.env.*
+
+# Documentation (keep README.md)
+*.md
+!README.md
+
+# Testing artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
