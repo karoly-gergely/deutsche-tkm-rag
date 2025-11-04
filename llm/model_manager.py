@@ -1,4 +1,8 @@
-"""Model loading and management."""
+"""
+Lifecycle management for HuggingFace language models.
+Handles model loading, quantization for development environments,
+and device configuration for CPU and GPU deployments.
+"""
 
 from config import IS_DEV, settings
 

@@ -1,4 +1,8 @@
-"""Retrieval and reranking functionality."""
+"""
+Semantic document retrieval with optional cross-encoder reranking.
+Queries ChromaDB vector store and applies relevance scoring to improve
+result quality for RAG context generation.
+"""
 
 import numpy as np
 

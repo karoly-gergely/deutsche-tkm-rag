@@ -1,4 +1,8 @@
-"""OpenTelemetry tracing setup."""
+"""
+Distributed tracing initialization for request observability.
+Configures OpenTelemetry instrumentation when enabled, supporting
+console export for development and extensible exporters for production.
+"""
 
 from config import settings
 

@@ -1,4 +1,8 @@
-"""Prompt template management."""
+"""
+RAG prompt construction with context formatting and chat history.
+Builds structured prompts compatible with Qwen instruction-tuned models,
+incorporating retrieved documents and system instructions.
+"""
 
 from core.utils.imports import import_langchain_document_class
 

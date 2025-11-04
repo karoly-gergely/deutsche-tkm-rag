@@ -1,4 +1,8 @@
-"""Logging configuration."""
+"""
+Structured JSON logging with query and error tracking.
+Captures RAG pipeline events with document metadata and performance
+metrics, supporting both console and file-based output.
+"""
 
 import json
 import logging

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Script to ingest documents into the vector store."""
+"""
+Document ingestion pipeline for vector store population.
+Loads text files, applies chunking with metadata preservation,
+and indexes documents into ChromaDB for semantic search.
+"""
 import argparse
 import os
 import sys

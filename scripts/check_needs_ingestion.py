@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+Ingestion readiness check for deployment pipelines.
+Verifies ChromaDB vector store existence and non-empty status,
+exiting with appropriate status codes for CI/CD automation.
+"""
 import sys
 from pathlib import Path
 

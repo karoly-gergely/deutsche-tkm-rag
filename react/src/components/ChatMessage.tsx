@@ -1,12 +1,12 @@
 import { Bot, User, FileText } from "lucide-react";
 import type { Message } from "@/types/chat";
-import { Badge } from "./ui/badge";
+import { Badge } from "./core/badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "./ui/accordion";
+} from "./core/accordion";
 
 interface ChatMessageProps {
   message: Message;

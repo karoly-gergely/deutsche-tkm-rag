@@ -1,4 +1,8 @@
-"""Metrics collection."""
+"""
+Performance metrics tracking for counters and latency measurements.
+Provides in-memory registry for API endpoint exposure and supports
+decorator-based timing instrumentation across the application.
+"""
 
 import time
 from collections.abc import Callable

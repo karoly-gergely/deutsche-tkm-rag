@@ -1,4 +1,8 @@
-"""Text generation functionality."""
+"""
+Language model inference for RAG response generation.
+Handles tokenization, device placement, and streaming output
+for conversational responses based on retrieved context.
+"""
 
 
 def generate_response(
@@ -136,6 +140,7 @@ def generate_response_streaming(
             model = model.to(device)
     else:
         inputs = {k: v.to("cpu") for k, v in inputs.items()}
+        torch.set_num_threads(6)
         if hasattr(model, "to"):
             model = model.to("cpu")
 

@@ -1,3 +1,9 @@
+"""
+Application configuration and environment detection.
+Defines model paths, embedding settings, chunking parameters,
+and infrastructure settings for the RAG pipeline.
+"""
+
 import os
 import socket
 

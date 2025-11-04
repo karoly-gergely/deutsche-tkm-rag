@@ -1,3 +1,9 @@
+"""
+Dynamic import utilities for LangChain compatibility across versions.
+Handles version differences by attempting multiple import paths
+for document classes, vector stores, and embedding wrappers.
+"""
+
 from importlib import import_module
 
 

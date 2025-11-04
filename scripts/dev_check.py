@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Development check script - prints environment, data count, and Chroma status."""
+"""
+Development environment diagnostic tool.
+Reports Python configuration, data file inventory, ChromaDB status,
+and key settings for troubleshooting and setup verification.
+"""
 import os
 import sys
 from pathlib import Path

@@ -1,4 +1,8 @@
-"""Document metadata extraction and management."""
+"""
+Publication metadata extraction from document content.
+Identifies topics, dates, companies, and publication identifiers
+using keyword matching and pattern recognition for enhanced searchability.
+"""
 
 import hashlib
 import os

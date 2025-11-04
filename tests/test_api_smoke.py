@@ -1,4 +1,8 @@
-"""Smoke tests for FastAPI endpoints."""
+"""
+API endpoint validation and integration tests.
+Exercises health checks, query processing, and input validation
+with mocked dependencies to verify request handling correctness.
+"""
 
 from unittest.mock import MagicMock, patch
 

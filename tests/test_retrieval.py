@@ -1,4 +1,8 @@
-"""Tests for retrieval functionality."""
+"""
+Vector retrieval and reranking behavior verification.
+Tests similarity search, metadata filtering, and cross-encoder
+reranking using temporary ChromaDB instances for isolation.
+"""
 
 from unittest.mock import Mock, patch
 

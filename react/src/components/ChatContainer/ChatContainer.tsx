@@ -1,15 +1,10 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Loader2 } from "lucide-react";
-import { ChatMessage } from "./ChatMessage";
-import { ChatInput } from "./ChatInput";
-import type { Message } from "@/types/chat";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { sendQuery } from "@/lib/api";
-
-const INITIAL_MESSAGE: Message = {
-  role: "assistant",
-  content: "Hello! I'm here to help you with questions about Deutsche Telekom publications. What would you like to know?",
-  timestamp: new Date(),
-};
+import { Message } from "@/types/chat";
+import { ChatMessage } from "../ChatMessage";
+import { ChatInput } from "../ChatInput";
+import { LoadingIndicator } from "./components/LoadingIndicator";
+import { INITIAL_MESSAGE } from "./constants";
 
 export const ChatContainer = () => {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
@@ -68,23 +63,6 @@ export const ChatContainer = () => {
     []
   );
 
-  const loadingIndicator = useMemo(
-    () => (
-      <div className="flex gap-3 mb-4" role="status" aria-label="Loading">
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-          <Loader2
-            className="w-5 h-5 animate-spin text-foreground"
-            aria-hidden="true"
-          />
-        </div>
-        <div className="flex-1 max-w-[80%] sm:max-w-[75%] md:max-w-[70%] p-4 rounded-2xl bg-secondary">
-          <p className="text-sm text-muted-foreground">Thinking...</p>
-        </div>
-      </div>
-    ),
-    []
-  );
-
   return (
     <div className="flex flex-col h-screen">
       <header className="border-b border-border bg-card px-4 sm:px-6 py-4">
@@ -118,7 +96,7 @@ export const ChatContainer = () => {
           {messages.map((message, index) => (
             <ChatMessage key={index} message={message} />
           ))}
-          {isLoading && loadingIndicator}
+          {isLoading && <LoadingIndicator />}
           <div ref={messagesEndRef} aria-hidden="true" />
         </div>
       </main>

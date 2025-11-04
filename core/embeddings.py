@@ -1,4 +1,8 @@
-"""Embedding model management."""
+"""
+Vector embedding generation for semantic search.
+Wraps sentence-transformers models and provides LangChain-compatible
+embeddings for ChromaDB integration.
+"""
 
 from sentence_transformers import SentenceTransformer
 

@@ -1,4 +1,8 @@
-"""Document loading functionality."""
+"""
+File system document ingestion with metadata extraction.
+Loads text files from data directory, applies metadata enrichment,
+and produces LangChain Document objects for vector store indexing.
+"""
 
 import logging
 import os

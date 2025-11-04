@@ -1,4 +1,8 @@
-"""Dependency injection for API components (singletons)."""
+"""
+Provides singleton accessors for core RAG components including
+vector database, retriever, language model, and logging infrastructure.
+Ensures lazy initialization and shared state across API requests.
+"""
 
 from config import settings
 from core.embeddings import get_embeddings

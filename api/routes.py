@@ -1,4 +1,8 @@
-"""FastAPI routes for RAG application."""
+"""
+Defines API endpoints for document ingestion, embedding generation,
+and retrieval within the RAG service. Integrates with ChromaDB and
+the HuggingFace language model layer for response generation.
+"""
 
 import time
 from contextlib import asynccontextmanager

@@ -1,4 +1,8 @@
-"""Streamlit UI for RAG application."""
+"""
+Interactive web interface for RAG query processing.
+Provides chat-based interface with streaming responses, source
+attribution, and configurable retrieval parameters for end users.
+"""
 
 import time
 from pathlib import Path

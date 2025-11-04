@@ -1,4 +1,8 @@
-"""Text chunking strategies."""
+"""
+Text segmentation strategies for document processing.
+Implements metadata-aware chunking with overlap preservation
+for vector store indexing using LangChain document structures.
+"""
 
 import hashlib
 from abc import ABC, abstractmethod

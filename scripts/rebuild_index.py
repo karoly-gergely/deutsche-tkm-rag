@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Script to rebuild the vector store index."""
+"""
+Vector store index reconstruction utility.
+Removes existing ChromaDB data and re-runs the full ingestion
+pipeline to refresh embeddings and metadata after document updates.
+"""
 import argparse
 import shutil
 import sys
