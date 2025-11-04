@@ -1,32 +1,25 @@
 """Text chunking strategies."""
+
 import hashlib
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
+from core.utils.imports import (
+    import_langchain_document_class,
+    import_langchain_recursive_character_text_splitter,
+)
 
-try:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.text_splitters import RecursiveCharacterTextSplitter
-    except ImportError:
-        RecursiveCharacterTextSplitter = None
+Document = import_langchain_document_class()
+RecursiveCharacterTextSplitter = (
+    import_langchain_recursive_character_text_splitter()
+)
 
 
 class ChunkingStrategy(ABC):
     """Abstract base class for chunking strategies."""
 
     @abstractmethod
-    def chunk(self, text: str) -> List[str]:
+    def chunk(self, text: str) -> list[str]:
         """Split text into chunks.
 
         Args:
@@ -51,7 +44,7 @@ class TextChunker(ChunkingStrategy):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
-    def chunk(self, text: str) -> List[str]:
+    def chunk(self, text: str) -> list[str]:
         """Split text into chunks with overlap.
 
         Args:
@@ -97,7 +90,9 @@ class MetadataAwareChunker:
         )
 
     @staticmethod
-    def _generate_chunk_id(doc_id: str, chunk_index: int, chunk_text: str) -> str:
+    def _generate_chunk_id(
+        doc_id: str, chunk_index: int, chunk_text: str
+    ) -> str:
         """Generate stable chunk ID from doc_id, index, and first 50 chars.
 
         Args:
@@ -115,7 +110,7 @@ class MetadataAwareChunker:
 
     def chunk_with_metadata(
         self, text: str, source: str, doc_id: str, **metadata: Any
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Split text into chunks with consistent metadata.
 
         Args:
@@ -144,7 +139,7 @@ class MetadataAwareChunker:
             )
 
             # Build metadata dictionary
-            chunk_metadata: Dict[str, Any] = {
+            chunk_metadata: dict[str, Any] = {
                 "source": source,
                 "doc_id": doc_id,
                 "chunk_index": idx,
@@ -160,4 +155,3 @@ class MetadataAwareChunker:
             documents.append(doc)
 
         return documents
-

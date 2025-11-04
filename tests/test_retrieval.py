@@ -1,23 +1,18 @@
 """Tests for retrieval functionality."""
+
 from unittest.mock import Mock, patch
 
 import pytest
 
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
+from core.utils.imports import (
+    import_langchain_chroma,
+    import_langchain_document_class,
+)
 
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:
-    from langchain.vectorstores import Chroma
+Document = import_langchain_document_class()
+Chroma = import_langchain_chroma()
 
 
 @pytest.mark.slow
@@ -66,7 +61,9 @@ def test_retrieval_basic(tmp_path):
     assert len(results) <= 3, "Should return at most 3 documents"
 
     # Verify document content
-    assert any("5G" in doc.page_content for doc in results), "Should retrieve 5G-related document"
+    assert any(
+        "5G" in doc.page_content for doc in results
+    ), "Should retrieve 5G-related document"
 
 
 @pytest.mark.slow
@@ -113,7 +110,9 @@ def test_retrieval_with_filters(tmp_path):
 
     # Query with filter for "5G" topic
     filters = {"topic": "5G"}
-    results = retriever.retrieve(query="mobile network", top_k=5, filters=filters)
+    results = retriever.retrieve(
+        query="mobile network", top_k=5, filters=filters
+    )
 
     # Assertions
     assert len(results) > 0, "Should return at least 1 filtered document"
@@ -123,7 +122,9 @@ def test_retrieval_with_filters(tmp_path):
 
     # Verify we got the expected documents
     pub_ids = {doc.metadata.get("publication_id") for doc in results}
-    assert "doc_1" in pub_ids or "doc_3" in pub_ids, "Should include 5G documents"
+    assert (
+        "doc_1" in pub_ids or "doc_3" in pub_ids
+    ), "Should include 5G documents"
 
 
 @pytest.mark.slow
@@ -175,7 +176,7 @@ def test_reranking(tmp_path):
             """Mock predict that returns scores based on document content."""
             # pairs is [[query, doc_text], ...]
             scores = []
-            for query, doc_text in pairs:
+            for _query, doc_text in pairs:
                 # Match document by content to determine score
                 if "5G network deployment in Berlin" in doc_text:
                     scores.append(score_map["doc_2"])  # Highest
@@ -190,7 +191,8 @@ def test_reranking(tmp_path):
 
         # Create retriever with reranker (will use mocked CrossEncoder)
         retriever = AdvancedRetriever(
-            vectordb=vectordb, reranker_model="cross-encoder/ms-marco-MiniLM-L-6-v2"
+            vectordb=vectordb,
+            reranker_model="cross-encoder/ms-marco-MiniLM-L-6-v2",
         )
 
         # Query with reranking - need more candidates than final results
@@ -209,4 +211,3 @@ def test_reranking(tmp_path):
         assert (
             mock_cross_encoder_instance.predict.called
         ), "CrossEncoder.predict should be called to rerank documents"
-

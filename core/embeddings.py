@@ -1,5 +1,4 @@
 """Embedding model management."""
-from typing import List
 
 from sentence_transformers import SentenceTransformer
 
@@ -51,7 +50,7 @@ class EmbeddingModel:
             self._model = SentenceTransformer(self.model_name)
         return self._model
 
-    def encode(self, texts: List[str], **kwargs) -> List[List[float]]:
+    def encode(self, texts: list[str], **kwargs) -> list[list[float]]:
         """Encode texts into embeddings.
 
         Args:
@@ -63,7 +62,7 @@ class EmbeddingModel:
         """
         return self.model.encode(texts, **kwargs).tolist()
 
-    def encode_single(self, text: str, **kwargs) -> List[float]:
+    def encode_single(self, text: str, **kwargs) -> list[float]:
         """Encode a single text into an embedding.
 
         Args:
@@ -74,4 +73,3 @@ class EmbeddingModel:
             Embedding vector.
         """
         return self.encode([text], **kwargs)[0]
-

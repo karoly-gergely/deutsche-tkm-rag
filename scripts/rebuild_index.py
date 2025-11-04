@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 """Script to rebuild the vector store index."""
 import argparse
-import os
 import shutil
 import sys
 from pathlib import Path
-
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from config import settings
 from monitoring.logging import setup_logging
@@ -40,9 +36,11 @@ def main():
             shutil.rmtree(chroma_dir)
             print(f"✓ Removed existing index at {chroma_dir}")
         else:
-            response = input(
-                f"Delete existing index at {chroma_dir}? [y/N]: "
-            ).strip().lower()
+            response = (
+                input(f"Delete existing index at {chroma_dir}? [y/N]: ")
+                .strip()
+                .lower()
+            )
             if response == "y":
                 logger.info(f"Removing existing index: {chroma_dir}")
                 shutil.rmtree(chroma_dir)
@@ -65,7 +63,7 @@ def main():
         print("Running ingestion pipeline...")
         print("=" * 60)
         ingest_main()
-    except SystemExit as e:
+    except SystemExit:
         # Re-raise SystemExit to preserve exit codes
         raise
     except Exception as e:
@@ -79,4 +77,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -1,21 +1,28 @@
 """FastAPI routes for RAG application."""
+
 import time
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from api.dependencies import get_tokenizer, get_model, get_vectordb, get_retriever, get_prompt_manager, get_logger
-from config import settings, IS_DEV
+from api.dependencies import (
+    get_logger,
+    get_model,
+    get_prompt_manager,
+    get_retriever,
+    get_tokenizer,
+    get_vectordb,
+)
+from config import IS_DEV, settings
 from llm.generation import generate_response
 from monitoring.metrics import get_metrics_registry
 from monitoring.tracing import get_tracer, setup_tracing
 
-
 # Initialize tracing
 setup_tracing()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,8 +35,9 @@ async def lifespan(app: FastAPI):
     get_retriever()
     get_prompt_manager()
     logger.info("✅ Warm-up complete")
-    
+
     yield
+
 
 # Create FastAPI app
 app = FastAPI(title="RAG Assistant API", version="1.0.0", lifespan=lifespan)
@@ -48,7 +56,9 @@ if settings.ENABLE_TRACING:
     tracer = get_tracer()
     if tracer is not None:
         try:
-            from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+            from opentelemetry.instrumentation.fastapi import (
+                FastAPIInstrumentor,
+            )
 
             FastAPIInstrumentor.instrument_app(app)
         except ImportError:
@@ -59,9 +69,14 @@ if settings.ENABLE_TRACING:
 class QueryRequest(BaseModel):
     """Request model for query endpoint."""
 
-    query: str = Field(..., min_length=1, max_length=1000, description="User query")
-    top_k: Optional[int] = Field(
-        None, ge=1, le=20, description="Number of documents to retrieve (clamped to 1-20)"
+    query: str = Field(
+        ..., min_length=1, max_length=1000, description="User query"
+    )
+    top_k: int | None = Field(
+        None,
+        ge=1,
+        le=20,
+        description="Number of documents to retrieve (clamped to 1-20)",
     )
 
 
@@ -69,20 +84,21 @@ class QueryResponse(BaseModel):
     """Response model for query endpoint."""
 
     answer: str
-    sources: List[str]
+    sources: list[str]
 
 
 class HealthResponse(BaseModel):
     """Health check response."""
 
     status: str
-    sizes: Dict[str, Optional[int]]
+    sizes: dict[str, int | None]
 
 
 @app.get("/health")
 async def health_simple():
     """Simple health check endpoint."""
     from fastapi.responses import JSONResponse
+
     return JSONResponse(content={"status": "ok"}, status_code=200)
 
 
@@ -113,7 +129,7 @@ async def health_check():
 @app.get("/metrics")
 async def metrics():
     """Temporary metrics endpoint returning JSON counters.
-    
+
     Returns:
         JSON dictionary with counters and timers from metrics registry.
     """
@@ -215,5 +231,4 @@ async def query(request: QueryRequest):
         raise
     except Exception as e:
         logger.log_error(error=e, context={"query": request.query})
-        raise HTTPException(status_code=500, detail=str(e))
-
+        raise HTTPException(status_code=500, detail=str(e)) from e

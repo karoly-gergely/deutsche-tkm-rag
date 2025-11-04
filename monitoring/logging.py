@@ -1,21 +1,17 @@
 """Logging configuration."""
+
 import json
 import logging
 import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import settings
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
+from core.utils.imports import import_langchain_document_class
+
+Document = import_langchain_document_class()
 
 
 class JSONFormatter(logging.Formatter):
@@ -115,7 +111,7 @@ class StructuredLogger:
     def log_query(
         self,
         query: str,
-        retrieved_docs: List[Document],
+        retrieved_docs: list[Document],
         response_time: float,
         user_id: str | None = None,
     ) -> None:
@@ -149,7 +145,9 @@ class StructuredLogger:
 
         self.logger.info("Query processed", extra=log_data)
 
-    def log_error(self, error: Exception, context: Dict[str, Any] | None = None) -> None:
+    def log_error(
+        self, error: Exception, context: dict[str, Any] | None = None
+    ) -> None:
         """Log an error with context.
 
         Args:
@@ -206,4 +204,3 @@ def setup_logging() -> logging.Logger:
     logger.addHandler(file_handler)
 
     return logger
-

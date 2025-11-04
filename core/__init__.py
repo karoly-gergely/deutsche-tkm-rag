@@ -1,7 +1,13 @@
 """Core RAG functionality package."""
-from .embeddings import EmbeddingModel, get_embeddings
+
 from .chunking import ChunkingStrategy, MetadataAwareChunker, TextChunker
-from .retrieval import AdvancedRetriever, RetrievalError, RetrievalEngine, Reranker
+from .embeddings import EmbeddingModel, get_embeddings
+from .retrieval import (
+    AdvancedRetriever,
+    Reranker,
+    RetrievalEngine,
+    RetrievalError,
+)
 
 __all__ = [
     "EmbeddingModel",
@@ -14,4 +20,3 @@ __all__ = [
     "RetrievalEngine",
     "Reranker",
 ]
-

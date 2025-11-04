@@ -1,5 +1,5 @@
 """Streamlit UI for RAG application."""
-import os
+
 import time
 from pathlib import Path
 
@@ -12,16 +12,14 @@ if st.query_params.get("health") is not None:
 from config import settings
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
-
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:
-    from langchain.vectorstores import Chroma
-
+from core.utils.imports import import_langchain_chroma
 from llm.generation import generate_response, generate_response_streaming
 from llm.model_manager import ModelManager
 from llm.prompt_manager import PromptManager
 from monitoring.logging import StructuredLogger
+
+Chroma = import_langchain_chroma()
+
 
 # Page config
 st.set_page_config(
@@ -69,17 +67,19 @@ def initialize_system():
     # Load existing ChromaDB
     st.info(f"Loading vector store from {chroma_dir}")
     vectordb = Chroma(
-        persist_directory=chroma_dir,
-        embedding_function=embeddings
+        persist_directory=chroma_dir, embedding_function=embeddings
     )
-    
+
     # Verify it has data
     try:
-        if hasattr(vectordb, "_collection") and vectordb._collection is not None:
+        if (
+            hasattr(vectordb, "_collection")
+            and vectordb._collection is not None
+        ):
             count = vectordb._collection.count()
             if count == 0:
                 st.error(
-                    f"❌ Vector store exists but is empty (0 vectors)\n\n"
+                    "❌ Vector store exists but is empty (0 vectors)\n\n"
                     "Please run ingestion:\n"
                     "```bash\n"
                     "make ingest\n"
@@ -114,7 +114,7 @@ def main():
     # Settings sidebar
     with st.sidebar:
         st.header("⚙️ Settings")
-        
+
         # Initialize session state for settings if not exists
         if "top_k" not in st.session_state:
             st.session_state.top_k = settings.TOP_K
@@ -122,7 +122,7 @@ def main():
             st.session_state.temperature = settings.TEMPERATURE
         if "rerank_top_k" not in st.session_state:
             st.session_state.rerank_top_k = settings.RERANK_TOP_K
-        
+
         # Settings controls
         st.session_state.top_k = st.slider(
             "Top K (retrieval count)",
@@ -131,7 +131,7 @@ def main():
             value=st.session_state.top_k,
             help="Number of documents to retrieve",
         )
-        
+
         st.session_state.temperature = st.slider(
             "Temperature",
             min_value=0.0,
@@ -140,8 +140,12 @@ def main():
             step=0.1,
             help="Sampling temperature for generation (higher = more creative)",
         )
-        
-        rerank_top_k_display = st.session_state.rerank_top_k if st.session_state.rerank_top_k is not None else max(10, st.session_state.top_k + 5)
+
+        rerank_top_k_display = (
+            st.session_state.rerank_top_k
+            if st.session_state.rerank_top_k is not None
+            else max(10, st.session_state.top_k + 5)
+        )
         rerank_top_k_val = st.slider(
             "Rerank Top K",
             min_value=st.session_state.top_k + 1,
@@ -154,7 +158,7 @@ def main():
             st.session_state.rerank_top_k = rerank_top_k_val
         else:
             st.session_state.rerank_top_k = None
-        
+
         st.caption("💡 Settings are stored in session state only")
 
     # Initialize system
@@ -187,7 +191,9 @@ def main():
     # User input
     if user_query := st.chat_input("Ask a question about Deutsche Telekom..."):
         # Add user message to chat
-        st.session_state.messages.append({"role": "user", "content": user_query})
+        st.session_state.messages.append(
+            {"role": "user", "content": user_query}
+        )
         with st.chat_message("user"):
             st.markdown(user_query)
 
@@ -204,9 +210,9 @@ def main():
                 # Retrieve documents (use session state top_k)
                 status_bar.info("🔍 Retrieving relevant documents...")
                 retrieved_docs = retriever.retrieve(
-                    query=user_query, 
+                    query=user_query,
                     top_k=st.session_state.top_k,
-                    rerank_top_k=st.session_state.rerank_top_k
+                    rerank_top_k=st.session_state.rerank_top_k,
                 )
 
                 retrieval_time = time.time() - start_time
@@ -230,13 +236,13 @@ def main():
                 # Generate response with streaming
                 status_bar.info("🤖 Generating response...")
                 response_start = time.time()
-                
+
                 # Initialize response accumulator
                 full_response = ""
                 last_update_time = time.time()
                 update_interval = 0.1  # Update every 0.1 seconds
                 streaming_cursor = "▌"
-                
+
                 # Stream tokens
                 try:
                     for token_chunk in generate_response_streaming(
@@ -250,22 +256,26 @@ def main():
                     ):
                         # Accumulate tokens
                         full_response += token_chunk
-                        
+
                         # Throttle updates to maintain responsiveness (update every 0.1s)
                         current_time = time.time()
                         if current_time - last_update_time >= update_interval:
                             # Show streaming cursor while generating
-                            response_placeholder.markdown(full_response + streaming_cursor)
+                            response_placeholder.markdown(
+                                full_response + streaming_cursor
+                            )
                             last_update_time = current_time
-                    
+
                     # Final update without cursor once complete
                     response_placeholder.markdown(full_response)
                     status_bar.empty()  # Clear status bar
                     response = full_response
-                    
-                except Exception as stream_error:
+
+                except Exception:
                     # Fallback to non-streaming if streaming fails
-                    st.warning("Streaming unavailable, using standard generation...")
+                    st.warning(
+                        "Streaming unavailable, using standard generation..."
+                    )
                     response = generate_response(
                         tokenizer=tokenizer,
                         model=model,
@@ -277,7 +287,7 @@ def main():
                     )
                     response_placeholder.markdown(response)
                     status_bar.empty()  # Clear status bar
-                
+
                 generation_time = time.time() - response_start
                 total_time = time.time() - start_time
 
@@ -310,6 +320,8 @@ def main():
                     query=user_query,
                     retrieved_docs=retrieved_docs,
                     response_time=total_time,
+                    generation_time=generation_time,
+                    retrieval_time=retrieval_time,
                 )
 
                 # Status bar with metrics
@@ -326,4 +338,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

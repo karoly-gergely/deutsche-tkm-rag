@@ -3,28 +3,23 @@
 import argparse
 import os
 import sys
-from pathlib import Path
-
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:
-    from langchain.vectorstores import Chroma
 
 from config import settings
 from core.chunking import MetadataAwareChunker
 from core.embeddings import get_embeddings
+from core.utils.imports import import_langchain_chroma
 from loaders.loader import DocumentLoader
 from monitoring.logging import setup_logging
 
+Chroma = import_langchain_chroma()
 logger = setup_logging()
 
 
 def main():
     """Main ingestion function."""
-    parser = argparse.ArgumentParser(description="Ingest documents into vector store")
+    parser = argparse.ArgumentParser(
+        description="Ingest documents into vector store"
+    )
     parser.add_argument(
         "--data-folder",
         type=str,
@@ -66,7 +61,9 @@ def main():
         logger.info(f"Loaded {len(documents)} document(s)")
 
         # Chunk documents with metadata-aware chunker
-        logger.info(f"Chunking documents (size: {chunk_size}, overlap: {chunk_overlap})")
+        logger.info(
+            f"Chunking documents (size: {chunk_size}, overlap: {chunk_overlap})"
+        )
         chunker = MetadataAwareChunker(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap
         )
@@ -75,7 +72,9 @@ def main():
         for doc in documents:
             # Extract source and doc_id from document metadata
             source = doc.metadata.get("source", "Deutsche Telekom")
-            doc_id = doc.metadata.get("publication_id", doc.metadata.get("file_name", "unknown"))
+            doc_id = doc.metadata.get(
+                "publication_id", doc.metadata.get("file_name", "unknown")
+            )
 
             # Extract additional metadata to pass through
             extra_metadata = {
@@ -111,7 +110,7 @@ def main():
         logger.info("Vector store persisted successfully")
 
         # Print counts
-        print(f"\n✓ Ingestion completed successfully!")
+        print("\n✓ Ingestion completed successfully!")
         print(f"  Documents: {len(documents)}")
         print(f"  Chunks: {len(all_chunks)}")
         print(f"  Vector store: {chroma_dir}")
@@ -128,4 +127,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

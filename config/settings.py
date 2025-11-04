@@ -1,8 +1,7 @@
 import os
 import socket
-from pydantic_settings import BaseSettings
 
-from typing import Optional
+from pydantic_settings import BaseSettings
 
 
 def is_dev_environment() -> bool:
@@ -43,7 +42,7 @@ class Settings(BaseSettings):
 
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
-    DEVICE: str = "cpu" # cuda on GPU enabled machines
+    DEVICE: str = "cpu"  # cuda on GPU enabled machines
 
     CHUNK_SIZE: int = 500
 
@@ -51,7 +50,7 @@ class Settings(BaseSettings):
 
     TOP_K: int = 5
 
-    RERANK_TOP_K: Optional[int] = 10
+    RERANK_TOP_K: int | None = 10
 
     MAX_CONTEXT_TOKENS: int = 2000
 
@@ -71,7 +70,7 @@ class Settings(BaseSettings):
 
     LOG_DIR: str = "logs"
 
-    RERANKER_MODEL: Optional[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    RERANKER_MODEL: str | None = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
     class Config:
         env_file = ".env"
@@ -82,5 +81,6 @@ settings = Settings()
 
 
 if IS_DEV:
-    print("[DEV MODE] Development environment detected - applying CPU optimizations")
-
+    print(
+        "[DEV MODE] Development environment detected - applying CPU optimizations"
+    )

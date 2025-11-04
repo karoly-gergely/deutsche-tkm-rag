@@ -1,39 +1,20 @@
 """Retrieval and reranking functionality."""
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
-
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:
-    from langchain.vectorstores import Chroma
 
 from config import settings
 from core.embeddings import EmbeddingModel
+from core.utils.imports import (
+    import_langchain_chroma,
+    import_langchain_document_class,
+    import_langchain_huggingface_embeddings,
+    import_sentence_transformers_cross_encoder,
+)
 
-try:
-    from sentence_transformers import CrossEncoder
-except ImportError:
-    CrossEncoder = None
-
-# Try both langchain 0.1.x and 0.2+ import paths
-try:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-except ImportError:
-    try:
-        from langchain.embeddings import HuggingFaceEmbeddings
-    except ImportError:
-        raise ImportError(
-            "Could not import HuggingFaceEmbeddings. "
-            "Please install langchain or langchain-community."
-        )
+Document = import_langchain_document_class()
+Chroma = import_langchain_chroma()
+HuggingFaceEmbeddings = import_langchain_huggingface_embeddings()
+CrossEncoder = import_sentence_transformers_cross_encoder()
 
 
 class RetrievalError(Exception):
@@ -67,8 +48,8 @@ class Reranker:
         return self._model
 
     def rerank(
-        self, query: str, documents: List[str], top_k: int | None = None
-    ) -> List[tuple[str, float]]:
+        self, query: str, documents: list[str], top_k: int | None = None
+    ) -> list[tuple[str, float]]:
         """Rerank documents based on relevance to query.
 
         Args:
@@ -87,7 +68,7 @@ class Reranker:
         pairs = [[query, doc] for doc in documents]
         scores = self.model.predict(pairs)
 
-        scored_docs = list(zip(documents, scores.tolist()))
+        scored_docs = list(zip(documents, scores.tolist(), strict=False))
         scored_docs.sort(key=lambda x: x[1], reverse=True)
 
         return scored_docs[:top_k]
@@ -114,7 +95,7 @@ class RetrievalEngine:
         self.langchain_embeddings = HuggingFaceEmbeddings(
             model_name=settings.EMBEDDING_MODEL
         )
-        self._vectordb: Optional[Chroma] = None
+        self._vectordb: Chroma | None = None
 
     @property
     def vectordb(self) -> Chroma:
@@ -126,7 +107,7 @@ class RetrievalEngine:
             )
         return self._vectordb
 
-    def add_documents(self, documents: List[Document]) -> None:
+    def add_documents(self, documents: list[Document]) -> None:
         """Add documents to the vector store.
 
         Args:
@@ -137,7 +118,7 @@ class RetrievalEngine:
 
     def similarity_search(
         self, query: str, k: int | None = None, rerank: bool = False
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Perform similarity search.
 
         Args:
@@ -150,7 +131,9 @@ class RetrievalEngine:
         """
         k = k or settings.TOP_K
 
-        results = self.vectordb.similarity_search(query, k=k * 2 if rerank else k)
+        results = self.vectordb.similarity_search(
+            query, k=k * 2 if rerank else k
+        )
 
         if rerank:
             reranker = Reranker()
@@ -159,7 +142,11 @@ class RetrievalEngine:
 
             # Map back to documents
             text_to_doc = {doc.page_content: doc for doc in results}
-            results = [text_to_doc[text] for text, _ in reranked if text in text_to_doc]
+            results = [
+                text_to_doc[text]
+                for text, _ in reranked
+                if text in text_to_doc
+            ]
 
         return results[:k]
 
@@ -167,7 +154,7 @@ class RetrievalEngine:
 class AdvancedRetriever:
     """Advanced retriever with reranking and safe fallback support."""
 
-    def __init__(self, vectordb: Chroma, reranker_model: Optional[str] = None):
+    def __init__(self, vectordb: Chroma, reranker_model: str | None = None):
         """Initialize advanced retriever.
 
         Args:
@@ -197,18 +184,16 @@ class AdvancedRetriever:
                     "sentence-transformers is required for reranking. "
                     "Install with: pip install sentence-transformers"
                 )
-            self._reranker = CrossEncoder(
-                self.reranker_model, max_length=512
-            )
+            self._reranker = CrossEncoder(self.reranker_model, max_length=512)
         return self._reranker
 
     def retrieve(
         self,
         query: str,
         top_k: int = 5,
-        rerank_top_k: Optional[int] = None,
-        filters: Optional[Dict] = None,
-    ) -> List[Document]:
+        rerank_top_k: int | None = None,
+        filters: dict | None = None,
+    ) -> list[Document]:
         """Retrieve documents with optional reranking.
 
         Args:
@@ -228,9 +213,7 @@ class AdvancedRetriever:
             k = top_k
 
         # Perform similarity search
-        results = self.vectordb.similarity_search(
-            query, k=k, filter=filters
-        )
+        results = self.vectordb.similarity_search(query, k=k, filter=filters)
 
         # Apply reranking if reranker is available and we have more results than needed
         if self.reranker is not None and len(results) > top_k:
@@ -251,7 +234,7 @@ class AdvancedRetriever:
 
     def retrieve_with_scores(
         self, query: str, top_k: int = 5
-    ) -> List[Tuple[Document, float]]:
+    ) -> list[tuple[Document, float]]:
         """Retrieve documents with similarity scores.
 
         Args:
@@ -270,16 +253,13 @@ class AdvancedRetriever:
             )
 
             # Convert to list of tuples and ensure scores are floats
-            return [
-                (doc, float(score))
-                for doc, score in results_with_scores
-            ]
+            return [(doc, float(score)) for doc, score in results_with_scores]
         except Exception as e:
             raise RetrievalError(f"Failed to retrieve with scores: {e}") from e
 
     def retrieve_safe(
         self, query: str, top_k: int = 5, fallback_k: int = 3
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Retrieve documents with safe fallback on errors.
 
         Args:
@@ -306,4 +286,3 @@ class AdvancedRetriever:
                     f"Both primary and fallback retrieval failed. "
                     f"Primary error: {e}, Fallback error: {fallback_error}"
                 ) from fallback_error
-

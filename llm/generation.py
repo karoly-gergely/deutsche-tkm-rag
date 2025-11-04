@@ -62,7 +62,9 @@ def generate_response(
             model = model.to("cpu")
 
     # Generate response
-    with torch.no_grad():  # Deterministic cleanup: disable gradient computation
+    with (
+        torch.no_grad()
+    ):  # Deterministic cleanup: disable gradient computation
         outputs = model.generate(
             **inputs,
             max_new_tokens=max_new_tokens,
@@ -73,13 +75,11 @@ def generate_response(
         )
 
     # Decode and strip special tokens
-    generated_text = tokenizer.decode(
-        outputs[0], skip_special_tokens=True
-    )
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     # Remove prompt from output if present
     if generated_text.startswith(prompt):
-        generated_text = generated_text[len(prompt):].strip()
+        generated_text = generated_text[len(prompt) :].strip()
 
     return generated_text
 
@@ -111,8 +111,9 @@ def generate_response_streaming(
         Moves tensors to specified device, performs deterministic cleanup,
         and strips special tokens from output.
     """
-    import torch
     import threading
+
+    import torch
 
     # Tokenize prompt
     inputs = tokenizer(prompt, return_tensors="pt")
@@ -163,8 +164,7 @@ def generate_response_streaming(
         generation_thread.start()
 
         # Yield tokens as they come
-        for token in streamer:
-            yield token
+        yield from streamer
 
         generation_thread.join()
 
@@ -192,5 +192,3 @@ def generate_response_streaming(
         chunk_size = 5  # characters per chunk
         for i in range(0, len(generated_text), chunk_size):
             yield generated_text[i : i + chunk_size]
-
-

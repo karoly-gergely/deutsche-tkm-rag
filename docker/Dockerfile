@@ -26,9 +26,8 @@ ENV POETRY_VIRTUALENVS_CREATE=false \
 ARG INSTALL_DEV_DEPS=false
 
 # Copy Poetry configuration files first for better layer caching
-COPY pyproject.toml ./
-# Copy poetry.lock if it exists (will be included in COPY . . below if present)
-# If missing, Poetry will generate it during install
+COPY pyproject.toml poetry.lock* ./
+# poetry.lock is optional - if missing, Poetry will generate it during install
 
 # Install dependencies conditionally based on build arg
 # Production: --no-dev excludes dev dependencies

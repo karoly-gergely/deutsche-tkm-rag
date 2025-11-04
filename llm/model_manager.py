@@ -1,7 +1,6 @@
 """Model loading and management."""
-from typing import Tuple
 
-from config import settings, IS_DEV
+from config import IS_DEV, settings
 
 
 class ModelManager:
@@ -18,7 +17,7 @@ class ModelManager:
         else:
             self.model_id = model_id or settings.MODEL_ID
 
-    def load_model(self) -> Tuple:
+    def load_model(self) -> tuple:
         """Load tokenizer and model.
 
         Returns:
@@ -28,9 +27,8 @@ class ModelManager:
             Uses device_map="auto" and torch_dtype="auto" when DEVICE != "cpu",
             otherwise loads on CPU. Sets pad_token_id for generation config.
         """
-        from transformers import AutoModelForCausalLM, AutoTokenizer
-
         import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(
@@ -55,7 +53,9 @@ class ModelManager:
             model = AutoModelForCausalLM.from_pretrained(
                 self.model_id,
                 trust_remote_code=True,
-                torch_dtype=torch.float16 if torch.cuda.is_available() else "auto",
+                torch_dtype=(
+                    torch.float16 if torch.cuda.is_available() else "auto"
+                ),
                 device_map="cuda" if torch.cuda.is_available() else "auto",
             )
         else:
@@ -71,4 +71,3 @@ class ModelManager:
             model.generation_config.pad_token_id = tokenizer.eos_token_id
 
         return tokenizer, model
-

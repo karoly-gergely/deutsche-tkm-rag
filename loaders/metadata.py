@@ -1,11 +1,12 @@
 """Document metadata extraction and management."""
+
 import hashlib
 import os
 import re
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -18,7 +19,7 @@ class DocumentMetadata:
     file_extension: str
     content_hash: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metadata to dictionary."""
         return {
             "source": self.source,
@@ -29,7 +30,7 @@ class DocumentMetadata:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DocumentMetadata":
+    def from_dict(cls, data: dict[str, Any]) -> "DocumentMetadata":
         """Create metadata from dictionary."""
         return cls(**data)
 
@@ -76,9 +77,7 @@ class MetadataExtractor:
     }
 
     # Date regex patterns: DD.MM.YYYY or YYYY-MM-DD
-    DATE_PATTERN = re.compile(
-        r"\b(\d{2}\.\d{2}\.\d{4}|\d{4}-\d{2}-\d{2})\b"
-    )
+    DATE_PATTERN = re.compile(r"\b(\d{2}\.\d{2}\.\d{4}|\d{4}-\d{2}-\d{2})\b")
 
     @staticmethod
     def _count_words(text: str) -> int:
@@ -93,7 +92,7 @@ class MetadataExtractor:
         return len(text.split())
 
     @staticmethod
-    def _extract_dates(text: str) -> List[str]:
+    def _extract_dates(text: str) -> list[str]:
         """Extract mentioned dates from text.
 
         Args:
@@ -105,7 +104,7 @@ class MetadataExtractor:
         return MetadataExtractor.DATE_PATTERN.findall(text)
 
     @staticmethod
-    def _extract_topics(text: str) -> List[str]:
+    def _extract_topics(text: str) -> list[str]:
         """Extract topics by keyword matching.
 
         Args:
@@ -124,7 +123,7 @@ class MetadataExtractor:
         return matched_topics
 
     @staticmethod
-    def _extract_companies(text: str, limit: int = 10) -> List[str]:
+    def _extract_companies(text: str, limit: int = 10) -> list[str]:
         """Extract mentioned companies using cap-case bigram heuristic.
 
         Args:
@@ -168,7 +167,7 @@ class MetadataExtractor:
     @staticmethod
     def extract_publication_metadata(
         text: str, filename: str, file_path: str | None = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Extract publication metadata from text and filename.
 
         Args:
@@ -190,7 +189,9 @@ class MetadataExtractor:
         topics = MetadataExtractor._extract_topics(text)
 
         # Extract companies (limited to 10)
-        mentioned_companies = MetadataExtractor._extract_companies(text, limit=10)
+        mentioned_companies = MetadataExtractor._extract_companies(
+            text, limit=10
+        )
 
         # Build metadata dictionary
         metadata = {
@@ -231,4 +232,3 @@ def extract_metadata(file_path: str, content: str) -> DocumentMetadata:
         file_extension=path.suffix,
         content_hash=content_hash,
     )
-

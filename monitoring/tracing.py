@@ -1,10 +1,9 @@
 """OpenTelemetry tracing setup."""
-from typing import Optional
 
 from config import settings
 
 # Global tracer instance
-_tracer: Optional[object] = None
+_tracer: object | None = None
 _tracer_provider = None
 
 
@@ -22,7 +21,10 @@ def setup_tracing() -> None:
     try:
         from opentelemetry import trace
         from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+        from opentelemetry.sdk.trace.export import (
+            BatchSpanProcessor,
+            ConsoleSpanExporter,
+        )
 
         _tracer_provider = TracerProvider()
         trace.set_tracer_provider(_tracer_provider)
@@ -49,7 +51,7 @@ def setup_tracing() -> None:
         _tracer_provider = None
 
 
-def get_tracer() -> Optional[object]:
+def get_tracer() -> object | None:
     """Get OpenTelemetry tracer instance.
 
     Returns:
@@ -80,4 +82,3 @@ def get_tracer() -> Optional[object]:
 
 # Initialize tracing on module import if enabled
 setup_tracing()
-

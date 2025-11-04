@@ -1,20 +1,13 @@
 """Document loading functionality."""
+
 import logging
 import os
 from pathlib import Path
-from typing import List
 
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
-
+from core.utils.imports import import_langchain_document_class
 from loaders.metadata import MetadataExtractor
 
+Document = import_langchain_document_class()
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +36,7 @@ class DocumentLoader:
             FileNotFoundError: If file does not exist.
             UnicodeDecodeError: If file cannot be decoded as UTF-8.
         """
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return f.read()
 
     def _is_empty_file(self, file_path: str) -> bool:
@@ -60,7 +53,7 @@ class DocumentLoader:
         except OSError:
             return True
 
-    def _find_txt_files(self) -> List[str]:
+    def _find_txt_files(self) -> list[str]:
         """Find all .txt files in data folder.
 
         Returns:
@@ -74,7 +67,9 @@ class DocumentLoader:
             return txt_files
 
         if not data_path.is_dir():
-            logger.warning(f"Data folder is not a directory: {self.data_folder}")
+            logger.warning(
+                f"Data folder is not a directory: {self.data_folder}"
+            )
             return txt_files
 
         for file_path in data_path.glob("*.txt"):
@@ -82,7 +77,7 @@ class DocumentLoader:
 
         return sorted(txt_files)
 
-    def load_all_documents(self) -> List[Document]:
+    def load_all_documents(self) -> list[Document]:
         """Load all .txt documents from loaders folder with metadata.
 
         Reads all *.txt files in DATA_FOLDER, skips empty files,
@@ -115,7 +110,9 @@ class DocumentLoader:
 
                 # Skip if content is empty after loading
                 if not text.strip():
-                    logger.debug(f"Skipping file with empty content: {file_path}")
+                    logger.debug(
+                        f"Skipping file with empty content: {file_path}"
+                    )
                     continue
 
                 # Extract publication metadata
@@ -148,4 +145,3 @@ class DocumentLoader:
 
         logger.info(f"Successfully loaded {len(documents)} document(s)")
         return documents
-

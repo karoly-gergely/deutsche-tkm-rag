@@ -1,26 +1,22 @@
 """Dependency injection for API components (singletons)."""
-from typing import Optional
 
 from config import settings
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
-
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:
-    from langchain.vectorstores import Chroma
-
+from core.utils.imports import import_langchain_chroma
 from llm.model_manager import ModelManager
 from llm.prompt_manager import PromptManager
 from monitoring.logging import StructuredLogger
 
+Chroma = import_langchain_chroma()
+
 # Global singletons (lazy-loaded)
-_tokenizer: Optional[object] = None
-_model: Optional[object] = None
-_retriever: Optional[AdvancedRetriever] = None
-_prompt_manager: Optional[PromptManager] = None
-_logger: Optional[StructuredLogger] = None
-_vectordb: Optional[Chroma] = None
+_tokenizer: object | None = None
+_model: object | None = None
+_retriever: AdvancedRetriever | None = None
+_prompt_manager: PromptManager | None = None
+_logger: StructuredLogger | None = None
+_vectordb: Chroma | None = None
 
 
 def get_tokenizer():
@@ -46,7 +42,8 @@ def get_vectordb():
     if _vectordb is None:
         embeddings = get_embeddings()
         _vectordb = Chroma(
-            persist_directory=settings.CHROMA_DIR, embedding_function=embeddings
+            persist_directory=settings.CHROMA_DIR,
+            embedding_function=embeddings,
         )
     return _vectordb
 

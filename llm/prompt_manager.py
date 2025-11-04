@@ -1,14 +1,8 @@
 """Prompt template management."""
-from typing import List
 
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
+from core.utils.imports import import_langchain_document_class
+
+Document = import_langchain_document_class()
 
 
 class PromptManager:
@@ -24,7 +18,7 @@ Guidelines:
 - Use a professional tone appropriate for enterprise communications"""
 
     @staticmethod
-    def _format_context_block(context_docs: List[Document]) -> str:
+    def _format_context_block(context_docs: list[Document]) -> str:
         """Format context documents as numbered sources with excerpts.
 
         Args:
@@ -56,7 +50,9 @@ Guidelines:
 
     @staticmethod
     def build_rag_prompt(
-        query: str, context_docs: List[Document], chat_history: List[str] | None = None
+        query: str,
+        context_docs: list[Document],
+        chat_history: list[str] | None = None,
     ) -> str:
         """Build RAG prompt with context and chat history.
 
@@ -75,7 +71,9 @@ Guidelines:
         parts = []
 
         # System prompt
-        parts.append(f"<|im_start|>system\n{PromptManager.SYSTEM_PROMPT}<|im_end|>")
+        parts.append(
+            f"<|im_start|>system\n{PromptManager.SYSTEM_PROMPT}<|im_end|>"
+        )
 
         # Few-shot safe behavior instruction
         parts.append(
@@ -105,4 +103,3 @@ Guidelines:
         parts.append("<|im_start|>assistant\n")
 
         return "\n".join(parts)
-

@@ -1,8 +1,10 @@
 """Metrics collection."""
+
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
 
 # In-memory registry for demo
 _metrics_registry: dict[str, Any] = {
@@ -145,4 +147,3 @@ def track_timing(metric_name: str):
         return wrapper
 
     return decorator
-
