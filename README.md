@@ -54,8 +54,9 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
 
 ### Prerequisites
 
-- Python 3.10 or higher
-- pip or conda
+- Python 3.11 or higher
+- [Poetry](https://python-poetry.org/docs/#installation) for Python dependency management
+- Node.js 18+ and pnpm (for React frontend)
 
 ### Installation
 
@@ -64,41 +65,54 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
    cd /path/to/project
    ```
 
-2. **Create a virtual environment**:
+2. **Install Python dependencies with Poetry**:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   poetry install
    ```
 
-3. **Install dependencies**:
+3. **Set up environment variables**:
    ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
+   make setup
+   # Or manually: cp .env.example .env
    # Edit .env with your configuration
+   ```
+
+4. **Set up React frontend** (optional):
+   ```bash
+   make react-setup    # Creates .env file in react/ directory
+   make react-install  # Installs pnpm and React dependencies
    ```
 
 ### Ingest Documents
 
-Place your documents (PDF, TXT, JSON) in the `data/` folder, then run:
+Place your documents (TXT files) in the `data/` folder, then run:
 
 ```bash
-python scripts/ingest.py
+make ingest
 ```
 
-Or specify a custom data folder:
+Or using Poetry directly:
 
 ```bash
-python scripts/ingest.py --data-folder /path/to/documents
+poetry run python scripts/ingest.py
+```
+
+To specify a custom data folder:
+
+```bash
+poetry run python scripts/ingest.py --data-folder /path/to/documents
 ```
 
 ### Run the Streamlit UI
 
 ```bash
-streamlit run ui/streamlit_app.py
+make ui
+```
+
+Or using Poetry directly:
+
+```bash
+poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
 ```
 
 The application will be available at `http://localhost:8501`
@@ -106,16 +120,38 @@ The application will be available at `http://localhost:8501`
 ### Run the API Server
 
 ```bash
-uvicorn api.routes:app --reload --host 0.0.0.0 --port 8000
+make api
 ```
 
-API documentation will be available at `http://localhost:8000/docs`
+Or using Poetry directly:
+
+```bash
+poetry run uvicorn api.routes:app --reload --host 0.0.0.0 --port 8080
+```
+
+API documentation will be available at `http://localhost:8080/docs`
+
+### Run the React Frontend
+
+```bash
+make react-dev
+```
+
+The React application will be available at `http://localhost:5173`
+
+Other React commands:
+- `make react-build` - Build for production
+- `make react-lint` - Run linting
+- `make react-preview` - Preview production build
 
 ## Configuration
 
-All configuration is managed through environment variables. See `.env.example` for available options:
+### Backend Configuration
+
+All backend configuration is managed through environment variables. See `.env.example` for available options:
 
 - `MODEL_ID`: LLM model identifier (default: Qwen/Qwen2.5-3B-Instruct)
+- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: Qwen/Qwen2.5-1.5B-Instruct)
 - `EMBEDDING_MODEL`: Embedding model for vectorization
 - `DATA_FOLDER`: Path to documents folder
 - `CHROMA_DIR`: ChromaDB persistence directory
@@ -124,6 +160,18 @@ All configuration is managed through environment variables. See `.env.example` f
 - `MAX_NEW_TOKENS`: Maximum tokens to generate
 - `TEMPERATURE`: Sampling temperature
 - And more...
+
+### React Frontend Configuration
+
+React environment variables are configured in `react/.env` (created via `make react-setup`). Available variables:
+
+- `VITE_BASENAME`: Base path for the React app when deployed to a subdirectory (default: `/deutsche-tkm-rag`)
+  - Used in production builds to set the router basename and Vite base path
+  - In development, always uses `/`
+  
+- `VITE_API_URL`: API base URL for the backend (default: `http://localhost:8080`)
+  - Should point to your FastAPI backend
+  - For production, use the full URL (e.g., `https://api.example.com`)
 
 ## Project Structure
 
@@ -343,6 +391,7 @@ OpenTelemetry tracing is disabled by default. To enable:
 ### Model Licensing
 
 - **Qwen2.5-3B-Instruct**: Apache 2.0 License (commercial use allowed)
+- **Qwen2.5-1.5B-Instruct**: Apache 2.0 License (commercial use allowed)
 - **sentence-transformers/all-MiniLM-L6-v2**: Apache 2.0 License
 - **cross-encoder/ms-marco-MiniLM-L-6-v2**: Apache 2.0 License
 

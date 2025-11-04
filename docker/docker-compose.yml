@@ -72,7 +72,7 @@ services:
       args:
         INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-worker
-    command: poetry run python scripts/ingest.py
+    command: poetry run python scripts/rebuild_index.py --force
     env_file:
       - ../.env
     volumes:
@@ -85,9 +85,6 @@ services:
     restart: on-failure
     profiles:
       - worker
-    # Disabled by default - enable with:
-    #   docker-compose --profile worker up rag-worker
-    #   or: make docker && docker-compose up rag-worker
 
 volumes:
   data:

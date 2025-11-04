@@ -1,96 +1,38 @@
 """FastAPI routes for RAG application."""
 import time
+from contextlib import asynccontextmanager
 from typing import Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from api.dependencies import get_tokenizer, get_model, get_vectordb, get_retriever, get_prompt_manager, get_logger
 from config import settings, IS_DEV
-from core.embeddings import get_embeddings
-from core.retrieval import AdvancedRetriever
-
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:
-    from langchain.vectorstores import Chroma
-
 from llm.generation import generate_response
-from llm.model_manager import ModelManager
-from llm.prompt_manager import PromptManager
-from monitoring.logging import StructuredLogger
 from monitoring.metrics import get_metrics_registry
 from monitoring.tracing import get_tracer, setup_tracing
-
-# Global singletons (lazy-loaded)
-_tokenizer = None
-_model = None
-_retriever = None
-_prompt_manager = None
-_logger = None
-_vectordb = None
-
-
-def get_tokenizer():
-    """Lazy-load tokenizer."""
-    global _tokenizer, _model
-    if _tokenizer is None:
-        model_manager = ModelManager()
-        _tokenizer, _model = model_manager.load_model()
-    return _tokenizer
-
-
-def get_model():
-    """Lazy-load model."""
-    global _model
-    if _model is None:
-        get_tokenizer()  # Triggers loading of both
-    return _model
-
-
-def get_vectordb():
-    """Lazy-load vector database."""
-    global _vectordb
-    if _vectordb is None:
-        embeddings = get_embeddings()
-        _vectordb = Chroma(
-            persist_directory=settings.CHROMA_DIR, embedding_function=embeddings
-        )
-    return _vectordb
-
-
-def get_retriever():
-    """Lazy-load retriever."""
-    global _retriever
-    if _retriever is None:
-        vectordb = get_vectordb()
-        _retriever = AdvancedRetriever(
-            vectordb=vectordb, reranker_model=settings.RERANKER_MODEL
-        )
-    return _retriever
-
-
-def get_prompt_manager():
-    """Lazy-load prompt manager."""
-    global _prompt_manager
-    if _prompt_manager is None:
-        _prompt_manager = PromptManager()
-    return _prompt_manager
-
-
-def get_logger():
-    """Lazy-load logger."""
-    global _logger
-    if _logger is None:
-        _logger = StructuredLogger("rag_api", log_dir=settings.LOG_DIR)
-    return _logger
 
 
 # Initialize tracing
 setup_tracing()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handle warm-up on startup."""
+    logger = get_logger()
+    logger.info("Warming up components...")
+    get_tokenizer()
+    get_model()
+    get_vectordb()
+    get_retriever()
+    get_prompt_manager()
+    logger.info("✅ Warm-up complete")
+    
+    yield
+
 # Create FastAPI app
-app = FastAPI(title="RAG Assistant API", version="1.0.0")
+app = FastAPI(title="RAG Assistant API", version="1.0.0", lifespan=lifespan)
 
 # CORS middleware
 app.add_middleware(

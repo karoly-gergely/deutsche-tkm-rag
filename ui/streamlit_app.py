@@ -10,18 +10,8 @@ if st.query_params.get("health") is not None:
     st.stop()
 
 from config import settings
-from core.chunking import MetadataAwareChunker
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
-from loaders.loader import DocumentLoader
-try:
-    from langchain_core.documents import Document
-except ImportError:
-    # Fallback for older langchain versions
-    try:
-        from langchain.docstore.document import Document
-    except ImportError:
-        from langchain.schema import Document
 
 try:
     from langchain_community.vectorstores import Chroma
@@ -58,66 +48,47 @@ def initialize_system():
     # Get embeddings
     embeddings = get_embeddings()
 
-    # Check if ChromaDB exists, else run ingestion
+    # Load ChromaDB (must exist - ingestion should be run separately)
     chroma_dir = settings.CHROMA_DIR
     chroma_path = Path(chroma_dir)
 
-    if chroma_path.exists() and any(chroma_path.iterdir()):
-        # Load existing ChromaDB
-        st.info(f"Loading existing vector store from {chroma_dir}")
-        vectordb = Chroma(
-            persist_directory=chroma_dir, embedding_function=embeddings
+    if not chroma_path.exists() or not any(chroma_path.iterdir()):
+        st.error(
+            f"❌ Vector store not found at {chroma_dir}\n\n"
+            "Please run ingestion first:\n"
+            "```bash\n"
+            "make ingest\n"
+            "```\n"
+            "Or:\n"
+            "```bash\n"
+            "poetry run python scripts/ingest.py\n"
+            "```"
         )
-    else:
-        # Run ingestion inline
-        st.info("Vector store not found. Running ingestion...")
-        with st.spinner("Ingesting documents..."):
-            # Load documents
-            loader = DocumentLoader(data_folder=settings.DATA_FOLDER)
-            documents = loader.load_all_documents()
+        st.stop()
 
-            if not documents:
-                raise ValueError(
-                    f"No documents found in {settings.DATA_FOLDER}. "
-                    "Please ensure documents are available."
+    # Load existing ChromaDB
+    st.info(f"Loading vector store from {chroma_dir}")
+    vectordb = Chroma(
+        persist_directory=chroma_dir,
+        embedding_function=embeddings
+    )
+    
+    # Verify it has data
+    try:
+        if hasattr(vectordb, "_collection") and vectordb._collection is not None:
+            count = vectordb._collection.count()
+            if count == 0:
+                st.error(
+                    f"❌ Vector store exists but is empty (0 vectors)\n\n"
+                    "Please run ingestion:\n"
+                    "```bash\n"
+                    "make ingest\n"
+                    "```"
                 )
-
-            # Chunk documents with metadata
-            chunker = MetadataAwareChunker(
-                chunk_size=settings.CHUNK_SIZE, chunk_overlap=settings.CHUNK_OVERLAP
-            )
-
-            all_chunks = []
-            for doc in documents:
-                source = doc.metadata.get("source", "Deutsche Telekom")
-                doc_id = doc.metadata.get(
-                    "publication_id", doc.metadata.get("file_name", "unknown")
-                )
-                extra_metadata = {
-                    k: v
-                    for k, v in doc.metadata.items()
-                    if k not in ["source", "publication_id", "file_name"]
-                }
-
-                chunks = chunker.chunk_with_metadata(
-                    text=doc.page_content,
-                    source=source,
-                    doc_id=doc_id,
-                    **extra_metadata,
-                )
-                all_chunks.extend(chunks)
-
-            # Create vector store
-            os.makedirs(chroma_dir, exist_ok=True)
-            vectordb = Chroma.from_documents(
-                documents=all_chunks,
-                embedding=embeddings,
-                persist_directory=chroma_dir,
-            )
-            vectordb.persist()
-            st.success(
-                f"Ingestion complete: {len(all_chunks)} chunks from {len(documents)} documents"
-            )
+                st.stop()
+    except Exception:
+        # If we can't check, continue anyway - might work
+        pass
 
     # Instantiate AdvancedRetriever
     retriever = AdvancedRetriever(

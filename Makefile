@@ -1,4 +1,4 @@
-.PHONY: venv install ingest ui api test fmt lint rebuild-index dev-check up down rebuild clear publish deps-install deps-update deps-lock setup worker dev rebuild-dev health ps logs shell shell-ui react-setup react-install react-dev react-build react-lint react-preview audit-react
+.PHONY: venv install ingest ui api test fmt lint rebuild-index rebuild-index-force dev-check up down rebuild clear publish deps-install deps-update deps-lock setup worker worker-build dev rebuild-dev health ps logs shell shell-ui react-setup react-install react-dev react-build react-lint react-preview audit-react
 
 # ==========================================================
 # Docker lifecycle commands
@@ -25,6 +25,12 @@ rebuild:
 	docker-compose -f docker/docker-compose.yml down --remove-orphans
 	docker-compose -f docker/docker-compose.yml up -d --build --force-recreate
 	docker image prune -f
+
+worker:
+	docker-compose -f docker/docker-compose.yml up rag-worker
+
+worker-build:
+	docker-compose -f docker/docker-compose.yml up --build rag-worker
 
 dev:
 	docker-compose -f docker/docker-compose.dev.yml up --build
@@ -98,7 +104,8 @@ ingest:
 rebuild-index:
 	poetry run python scripts/rebuild_index.py
 
-worker: ingest
+rebuild-index-force:
+	poetry run python scripts/rebuild_index.py --force
 
 ui:
 	poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
