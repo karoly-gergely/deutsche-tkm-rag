@@ -18,6 +18,10 @@ jobs:
       pages: write
       id-token: write
     
+    defaults:
+      run:
+        working-directory: ./react
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,7 +34,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -40,11 +44,19 @@ jobs:
           cache-dependency-path: react/pnpm-lock.yaml
       
       - name: Install dependencies
-        working-directory: ./react
         run: pnpm install --frozen-lockfile
       
+      - name: Configure git for gh-pages
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Configure git credential helper to use token
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com" > ~/.git-credentials
+          # Also set remote URL with token (from repo root)
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+      
       - name: Build and deploy to GitHub Pages
-        working-directory: ./react
         run: pnpm run deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
