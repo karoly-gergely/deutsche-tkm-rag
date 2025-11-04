@@ -370,3 +370,202 @@ The RAG system employs a sophisticated two-stage retrieval approach:
 2. **Precise Reranking**: Cross-encoder classification for high precision
 
 This hybrid approach balances speed and accuracy, making it suitable for production use while maintaining high-quality relevance classification for document retrieval.
+
+
+# System Interface
+
+## Overview
+
+The RAG system provides multiple interaction layers tailored for different operational and development needs. Each interface serves a distinct purpose within the overall architecture, balancing usability, flexibility, and scalability.  
+
+Currently, three main interaction methods are available:
+
+1. **Streamlit Application** — Internal experimentation and parameter tuning  
+2. **FastAPI REST Gateway** — Primary programmatic interface  
+3. **React Chatbot Application** — End-user facing web interface  
+
+---
+
+## 1. Streamlit Application (`ui`)
+
+### Purpose
+The Streamlit interface serves as an **internal research and debugging tool**, enabling rapid experimentation with RAG parameters and configurations. It provides an accessible environment for data scientists and engineers to test retrieval and generation behavior interactively before promoting configurations to production.
+
+### Characteristics
+- Designed for **scientific experimentation and parameter optimization**
+- Supports **streaming output**, simulating real-time inference behavior
+- Minimal setup; optimized for **local development and validation**
+- Directly integrates with the core RAG logic (retrieval, reranking, generation)
+
+### Limitations
+- Not intended for production use or large-scale deployment  
+- Limited scalability and customization capabilities compared to the API layer
+
+### Use Case
+Ideal for:
+- Rapid prototyping and model comparison
+- Debugging retrieval and generation logic
+- Demonstrating internal proof-of-concepts
+
+---
+
+## 2. FastAPI REST Gateway (`api`)
+
+### Purpose
+The FastAPI gateway represents the **primary access layer** for exposing RAG capabilities via a **RESTful API**. It acts as the operational backbone of the system, enabling both internal and external applications to interact with the RAG pipeline in a standardized and scalable manner.
+
+### Core Endpoints
+- **`/query`** — Main inference endpoint that processes user queries and returns RAG-generated responses.
+- **Health & Monitoring** — Auxiliary endpoints for system health checks, metrics, and status reporting.
+
+### Characteristics
+- Serves as the **main production entry point**
+- Provides structured **JSON-based responses**
+- Easily extensible with **authentication**, **rate limiting**, and **multi-feature support**
+- Fully compatible with the React frontend and other potential clients
+
+### Streaming
+Currently, responses are returned as **non-streaming** payloads.  
+Future iterations may include **token-level streaming** for real-time conversational experiences.
+
+### Advantages
+- Flexible configuration and deep integration options  
+- Production-ready scalability and monitoring capabilities  
+- Compatible with container orchestration and CI/CD pipelines  
+
+### Use Case
+Preferred for:
+- Integrating RAG capabilities into other services  
+- Building enterprise or multi-client applications  
+- Production deployment and monitoring scenarios  
+
+---
+
+## 3. React Chatbot Application (`react`)
+
+### Purpose
+The React chatbot provides a **user-facing conversational interface** for interacting with the RAG API. It is designed to simulate a realistic end-user experience and serves as a **reference implementation** for client-side integration.
+
+### Characteristics
+- Lightweight **Single Page Application (SPA)** built with React  
+- Connects directly to the FastAPI `/query` endpoint  
+- Provides a conversational chatbot-style interface  
+- Includes minimal configuration for **easy deployment and maintenance**
+
+### Deployment
+- Deployed automatically via **GitHub Actions** once Python CI tests pass  
+- Hosted using **GitHub Pages**  
+- Environment variables securely injected through **GitHub Secrets**
+
+### Purpose and Scope
+While not designed as a full-scale production frontend, it offers:
+- A functional demonstration of RAG’s user interaction flow  
+- A baseline implementation for future UX/UI extensions  
+- Quick local or remote deployment with minimal configuration overhead  
+
+### Limitations
+- Not optimized for enterprise-grade scaling  
+- Simplified state management and architecture for demonstration purposes  
+
+### Use Case
+Ideal for:
+- User acceptance testing  
+- Internal demos and stakeholder presentations  
+- Rapid feedback cycles on RAG system behavior  
+
+---
+
+# Deployment and Execution
+
+## Overview
+Multiple deployment and execution options are available to support diverse development and production workflows. These methods ensure flexibility across environments—from local prototyping to GPU-accelerated cloud deployment.
+
+---
+
+## 1. Local Execution (Python / Poetry)
+The system can be executed directly using Python or Poetry for quick iteration and debugging.  
+This mode is recommended for:
+- Local experimentation
+- Development of new ingestion or retrieval features
+- Unit and integration testing
+
+---
+
+## 2. Makefile Commands
+A dedicated `Makefile` provides simplified command shortcuts for routine operations such as:
+- Running the API or UI locally
+- Setting up and running the React application locally
+- Debugging and preparing the python applications
+- Rebuilding vector indexes
+- Running ingestion and cleaning datasets
+- Debbuging and running the docker images
+This ensures **consistent developer experience** and **standardized workflows**.
+
+---
+
+## 3. Docker-Based Development
+
+### Local Development (`docker-compose.dev.yml`)
+- Designed for **hot-reload development**  
+- Runs inference on **CPU** (optimized for compatibility, not performance)  
+- Requires manual ingestion (via shell access to the container)  
+- Intended for iterative local development and debugging
+
+### Staging Environment (`docker-compose.staging.yml`)
+- Targets **GPU-backed systems** (e.g., NVIDIA T4 or higher)  
+- Includes an additional **worker container** dedicated to rebuilding Chroma indexes  
+- Allows dataset updates without downtime in API/UI services  
+- Recommended GPU specs: ≥12GB VRAM, CUDA 12.x+
+
+### Notes
+- Staging environment can also run locally on compatible hardware  
+- Index rebuilds are triggered manually (future improvement: scheduled cron-based jobs)
+
+---
+
+## 4. Production Image Deployment
+
+### Description
+A **standalone Docker image** is used for production-grade deployment, focusing on **portability and simplicity**.  
+It is pushed to a **public DockerHub repository** and deployed on **Vast.ai GPU instances** for accelerated inference.
+
+### Execution Flow
+- On container startup, ingestion and indexing are triggered automatically via `entrypoint.sh`
+- Self-signed SSL certificates are used for FastAPI (as a proof of concept)
+- Future enhancements include:
+  - Integration with CI/CD pipelines
+  - Automated SSL and secure secrets management
+  - Scalable cloud-native deployment (Kubernetes-ready)
+
+### Performance Note
+While CPU-based inference is functional, **GPU-backed instances** are strongly recommended for production use due to the significant performance difference.
+
+---
+
+## 5. React Application Deployment
+The React chatbot (`react/`) is **not containerized** within the Docker setups.  
+It is built and deployed separately through the GitHub CI/CD workflow, as described above.
+
+---
+
+## Summary
+
+| Deployment Mode | Purpose | Inference Type | Notes |
+|------------------|----------|----------------|-------|
+| **Local (Python/Poetry)** | Quick debugging & dev | CPU | Fast iteration |
+| **Makefile** | Consistent dev ops | CPU/GPU | Simplifies commands |
+| **Docker (Dev)** | Local hot-reload | CPU | Manual ingestion |
+| **Docker (Staging)** | Pre-production testing | GPU | Worker-based indexing |
+| **Production Image** | Live deployment | GPU | Vast.ai or similar |
+| **React SPA** | User interface | — | Deployed via GitHub Pages |
+
+---
+
+## Conclusion on Interface, Deployment & Execution/Development
+
+The RAG system exposes a robust and flexible interface architecture:
+- A **Streamlit UI** for experimentation and parameter tuning  
+- A **FastAPI gateway** for scalable production-level integration  
+- A **React chatbot** for intuitive human interaction  
+
+Together with multi-environment deployment options—from local CPU testing to GPU-backed production—the system offers both agility during development and reliability during operation.

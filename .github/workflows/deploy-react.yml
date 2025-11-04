@@ -44,10 +44,10 @@ jobs:
           cache-dependency-path: react/pnpm-lock.yaml
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: cd react && pnpm install --frozen-lockfile
       
       - name: Build and deploy to GitHub Pages
-        run: pnpm run deploy
+        run: cd react && pnpm run deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_BASENAME: ${{ secrets.VITE_BASENAME }}
