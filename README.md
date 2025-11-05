@@ -15,39 +15,44 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
 ## Architecture
 
 ```
-┌─────────────┐
-│   User      │
-└─────┬───────┘
-      │
-      ├─────────────────┬─────────────────┐
-      │                 │                 │
-      ▼                 ▼                 ▼
-┌──────────┐    ┌──────────┐    ┌──────────┐
-│ Streamlit│    │ FastAPI  │    │ Scripts  │
-│   UI     │    │   API    │    │ (CLI)    │
-└────┬─────┘    └────┬─────┘    └────┬─────┘
-     │              │                │
-     └──────────────┼────────────────┘
-                    │
-                    ▼
-          ┌──────────────────┐
-          │  LLM Generator   │
-          │  (Qwen2.5-3B)    │
-          └─────────┬────────┘
-                    │
-                    ▼
-          ┌──────────────────┐
-          │ Retrieval Engine │
-          │  (ChromaDB)      │
-          └─────────┬────────┘
-                    │
-          ┌─────────┴─────────┐
-          │                   │
-          ▼                   ▼
-    ┌──────────┐      ┌──────────────┐
-    │Embeddings│      │  Chunking    │
-    │  Model   │      │  Strategy    │
-    └──────────┘      └──────────────┘
+                     ┌─────────────┐
+                     │    User     │
+                     └──────┬──────┘
+                            │
+      ┌──────────┬──────────┼──────────┬──────────┐
+      │          │          │          │          │
+      │          │          │          │          │
+      ▼          ▼          ▼          ▼          ▼
+    ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+    │Streamlit│ │React App │ │ FastAPI  │ │ Scripts  │
+    │   UI    │ │          │ │   API    │ │  (CLI)   │
+    └────┬────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
+         │           │            │            │
+         │           └────────────┘            │
+         │           (uses FastAPI)            │
+         │                 │                   │
+         │                 │                   │
+         └─────────────────┼───────────────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │  LLM Generator   │
+                  │  (Qwen2.5-3B)    │
+                  └─────────┬────────┘
+                            │
+                            ▼
+                  ┌──────────────────┐
+                  │ Retrieval Engine │
+                  │  (ChromaDB)      │
+                  └─────────┬────────┘
+                            │
+                  ┌─────────┴─────────┐
+                  │                   │
+                  ▼                   ▼
+            ┌──────────┐      ┌──────────────┐
+            │Embeddings│      │  Chunking    │
+            │  Model   │      │  Strategy    │
+            └──────────┘      └──────────────┘
 ```
 
 ## Quick Start
@@ -240,7 +245,7 @@ poetry run rebuild-index --force
 
 ## Docker
 
-### Build and Run with Docker Compose
+### Build and Run with Docker Compose (everything besides the React Application)
 
 ```bash
 docker-compose -f docker/docker-compose.yml up --build
@@ -256,7 +261,7 @@ This will:
 - Start the API server on port 8080
 - Start the Streamlit UI on port 8501
 
-### Development Mode (CPU-only, hot-reload)
+### Development Mode (CPU-only, hot-reload) (everything besides the React Application)
 
 ```bash
 make dev
@@ -264,7 +269,7 @@ make dev
 docker-compose -f docker/docker-compose.dev.yml up --build
 ```
 
-### Dockerfile Only
+### Dockerfile Only (everything besides the React Application)
 
 ```bash
 docker build -f docker/Dockerfile -t rag-assistant .

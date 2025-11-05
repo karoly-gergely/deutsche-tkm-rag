@@ -25,7 +25,6 @@ from llm.generation import generate_response
 from monitoring.metrics import get_metrics_registry
 from monitoring.tracing import get_tracer, setup_tracing
 
-
 logger = logging.getLogger(__name__)
 
 

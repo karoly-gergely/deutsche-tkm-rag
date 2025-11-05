@@ -8,13 +8,14 @@ import argparse
 import os
 import sys
 
+from langchain_community.vectorstores.utils import filter_complex_metadata
+
 from config import settings
 from core.chunking import MetadataAwareChunker
 from core.embeddings import get_embeddings
 from core.utils.imports import import_langchain_chroma
 from loaders.loader import DocumentLoader
 from monitoring.logging import setup_logging
-from langchain_community.vectorstores.utils import filter_complex_metadata
 
 Chroma = import_langchain_chroma()
 logger = setup_logging()

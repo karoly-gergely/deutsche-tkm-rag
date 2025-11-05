@@ -36,8 +36,11 @@ logs/
 *.tmp
 *.bak
 
+# Notebooks
+notebooks/
+
 # Local persistent storage (mounted as volumes)
-data/
+# Note: data/ is included in image for production, but can be overridden via volume mounts. Ideally we should ignore it here, but the current deployment setup requires it to be included in the pushed image
 .chroma/
 
 # OS metadata

@@ -7,15 +7,9 @@ embeddings for ChromaDB integration.
 from sentence_transformers import SentenceTransformer
 
 from config import settings
+from core.utils.imports import import_langchain_huggingface_embeddings
 
-# Try both langchain 0.1.x and 0.2+ import paths
-try:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-except ImportError:
-    try:
-        from langchain.embeddings import HuggingFaceEmbeddings
-    except ImportError:
-        HuggingFaceEmbeddings = None
+HuggingFaceEmbeddings = import_langchain_huggingface_embeddings()
 
 
 def get_embeddings():
