@@ -39,7 +39,7 @@ export const ChatContainer = () => {
             role: msg.role,
             content: msg.content,
           }));
-        
+          
         const response = await sendQuery({ 
           query: content,
           messages: conversationHistory.length > 0 ? conversationHistory : undefined,
@@ -70,7 +70,7 @@ export const ChatContainer = () => {
         setIsLoading(false);
       }
     },
-    []
+    [messages]
   );
 
   return (
