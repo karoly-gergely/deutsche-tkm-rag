@@ -90,11 +90,11 @@ The RAG pipeline consists of several interconnected stages:
 
 #### 2.1 Embedding Model Selection
 - **Location**: `core/embeddings.py`
-- **Model**: `sentence-transformers/all-MiniLM-L6-v2`
-- **Dimensions**: 384-dimensional vectors
+- **Model**: `intfloat/multilingual-e5-large`
+- **Dimensions**: 1024-dimensional vectors
 - **Rationale**: 
-  - Lightweight and efficient
-  - Good balance between quality and speed
+  - Multilingual support for better cross-language understanding
+  - High-quality embeddings for improved retrieval accuracy
   - Compatible with LangChain's embedding interface
 
 #### 2.2 Embedding Generation
@@ -105,7 +105,7 @@ The RAG pipeline consists of several interconnected stages:
 
 **Embedding Properties**:
 - **Semantic Similarity**: Captures meaning, not just keyword matching
-- **Dimensionality**: 384 dimensions per chunk
+- **Dimensionality**: 1024 dimensions per chunk
 - **Normalization**: Cosine similarity for retrieval
 
 ---
@@ -123,7 +123,7 @@ The RAG pipeline consists of several interconnected stages:
 #### 3.2 Index Structure
 - **Collection**: Single collection containing all document chunks
 - **Stored Information**:
-  - Embedding vectors (384-dim)
+  - Embedding vectors (1024-dim)
   - Document metadata (publication_id, topics, dates, etc.)
   - Chunk identifiers and indices
   - Source text (for retrieval)
@@ -135,7 +135,7 @@ The RAG pipeline consists of several interconnected stages:
 #### 4.1 Query Embedding
 - **Process**:
   1. User query is received via API or UI
-  2. Same embedding model encodes query into 384-dimensional vector
+  2. Same embedding model encodes query into 1024-dimensional vector
   3. Query vector is normalized for cosine similarity computation
 
 #### 4.2 Vector Similarity Search
@@ -280,7 +280,7 @@ Context documents:
 
 #### 7.1 Model Loading
 - **Location**: `llm/model_manager.py`
-- **Model**: `Qwen/Qwen2.5-3B-Instruct` (production) or `Qwen/Qwen2.5-1.5B-Instruct` (dev)
+- **Model**: `Qwen/Qwen3-4B-Instruct-2507` (production) or `Qwen/Qwen2.5-1.5B-Instruct` (dev)
 - **Configuration**:
   - **Dev Mode**: Quantized (int8) for CPU efficiency
   - **Production**: Full precision on GPU, float16 on CUDA
@@ -288,7 +288,7 @@ Context documents:
 #### 7.2 Generation Parameters
 - **max_new_tokens**: 768 (production), 128 (dev)
 - **temperature**: 0.6 (production), 0.8 (dev)
-- **top_p**: 0.95 (nucleus sampling)
+- **top_p**: 0.9 (nucleus sampling)
 - **Device**: CPU or CUDA (auto-detected)
 
 #### 7.3 Streaming Response
@@ -358,8 +358,8 @@ Context documents:
 - `RERANKER_MODEL`: "cross-encoder/ms-marco-MiniLM-L-6-v2" (optional)
 
 ### Embeddings
-- `EMBEDDING_MODEL`: "sentence-transformers/all-MiniLM-L6-v2"
-- Dimensions: 384
+- `EMBEDDING_MODEL`: "intfloat/multilingual-e5-large"
+- Dimensions: 1024
 
 ---
 

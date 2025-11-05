@@ -41,14 +41,14 @@ IS_DEV = is_dev_environment()
 
 
 class Settings(BaseSettings):
-    MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct"
+    MODEL_ID: str = "Qwen/Qwen3-4B-Instruct-2507"
 
     # DEV_MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct-GGUF" GGUF files are not Hugging Face Transformers checkpoints so can't be used with AutoModelForCausalLM.from_pretrained
     DEV_MODEL_ID: str = "Qwen/Qwen2.5-1.5B-Instruct"
 
-    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    EMBEDDING_MODEL: str = "intfloat/multilingual-e5-large"
 
-    DEVICE: str = "cpu"  # cuda on GPU enabled machines
+    DEVICE: str = "cuda"  # cpu for dev purposes or non GPU-enabled machines
 
     CHUNK_SIZE: int = 500
 
@@ -58,13 +58,13 @@ class Settings(BaseSettings):
 
     RERANK_TOP_K: int | None = 10
 
-    MAX_CONTEXT_TOKENS: int = 2000
+    MAX_CONTEXT_TOKENS: int = 6000
 
     MAX_NEW_TOKENS: int = 768
 
     TEMPERATURE: float = 0.6
 
-    TOP_P: float = 0.95
+    TOP_P: float = 0.9
 
     DATA_FOLDER: str = "data"
 

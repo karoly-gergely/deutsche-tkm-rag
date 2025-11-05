@@ -27,13 +27,14 @@ export const ChatContainer = () => {
         content,
         timestamp: new Date(),
       };
+      const oldMessages = [...messages];
 
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
       setError(null);
 
       try {
-        const conversationHistory = messages
+        const conversationHistory = oldMessages
           .filter((msg) => msg.role === "user" || msg.role === "assistant")
           .map((msg) => ({
             role: msg.role,
@@ -42,7 +43,7 @@ export const ChatContainer = () => {
           
         const response = await sendQuery({ 
           query: content,
-          messages: conversationHistory.length > 0 ? conversationHistory : undefined,
+          messages: conversationHistory.length > 1 ? conversationHistory.slice(1) : undefined,
         });
 
         const assistantMessage: Message = {

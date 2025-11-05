@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     python3.11 python3.11-venv python3-pip \
+    gcc g++ \
     && python3.11 -m pip install --upgrade pip setuptools wheel \
     && ln -sf $(which python3.11) /usr/local/bin/python \
     && ln -sf $(which pip3) /usr/local/bin/pip \

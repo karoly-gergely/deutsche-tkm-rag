@@ -37,7 +37,7 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
                            ▼
                   ┌──────────────────┐
                   │  LLM Generator   │
-                  │  (Qwen2.5-3B)    │
+                  │  (Qwen3-4B)      │
                   └─────────┬────────┘
                             │
                             ▼
@@ -192,16 +192,24 @@ Other React commands:
 
 All backend configuration is managed through environment variables. See `.env.example` for available options:
 
-- `MODEL_ID`: LLM model identifier (default: Qwen/Qwen2.5-3B-Instruct)
-- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: Qwen/Qwen2.5-1.5B-Instruct)
-- `EMBEDDING_MODEL`: Embedding model for vectorization
-- `DATA_FOLDER`: Path to documents folder
-- `CHROMA_DIR`: ChromaDB persistence directory
-- `CHUNK_SIZE`: Text chunk size in words
-- `TOP_K`: Number of retrieved documents
-- `MAX_NEW_TOKENS`: Maximum tokens to generate
-- `TEMPERATURE`: Sampling temperature
-- And more...
+- `MODEL_ID`: LLM model identifier (default: `Qwen/Qwen3-4B-Instruct-2507`)
+- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: `Qwen/Qwen2.5-1.5B-Instruct`)
+- `EMBEDDING_MODEL`: Embedding model for vectorization (default: `intfloat/multilingual-e5-large`)
+- `DEVICE`: Device for model execution, `cuda` or `cpu` (default: `cuda`)
+- `DATA_FOLDER`: Path to documents folder (default: `data`)
+- `CHROMA_DIR`: ChromaDB persistence directory (default: `.chroma`)
+- `CHUNK_SIZE`: Text chunk size in characters (default: `500`)
+- `CHUNK_OVERLAP`: Overlap between chunks in characters (default: `100`)
+- `TOP_K`: Number of retrieved documents (default: `5`)
+- `RERANK_TOP_K`: Number of candidates for reranking (default: `10`)
+- `RERANKER_MODEL`: Reranker model identifier (default: `cross-encoder/ms-marco-MiniLM-L-6-v2`)
+- `MAX_CONTEXT_TOKENS`: Maximum context tokens (default: `6000`)
+- `MAX_NEW_TOKENS`: Maximum tokens to generate (default: `768`)
+- `TEMPERATURE`: Sampling temperature (default: `0.6`)
+- `TOP_P`: Nucleus sampling parameter (default: `0.9`)
+- `LOG_LEVEL`: Logging level (default: `INFO`)
+- `ENABLE_TRACING`: Enable OpenTelemetry tracing (default: `false`)
+- `LOG_DIR`: Log directory (default: `logs`)
 
 ### React Frontend Configuration
 
@@ -444,10 +452,10 @@ OpenTelemetry tracing is disabled by default. To enable:
 
 ### Model Licensing
 
-- **Qwen2.5-3B-Instruct**: Apache 2.0 License (commercial use allowed)
+- **Qwen3-4B-Instruct-2507**: Apache 2.0 License (commercial use allowed)
 - **Qwen2.5-1.5B-Instruct**: Apache 2.0 License (commercial use allowed)
-- **sentence-transformers/all-MiniLM-L6-v2**: Apache 2.0 License
-- **cross-encoder/ms-marco-MiniLM-L-6-v2**: Apache 2.0 License
+- **intfloat/multilingual-e5-large**: Apache 2.0 License (commercial use allowed)
+- **cross-encoder/ms-marco-MiniLM-L-6-v2**: Apache 2.0 License (commercial use allowed)
 
 Please review individual model licenses before commercial deployment.
 
