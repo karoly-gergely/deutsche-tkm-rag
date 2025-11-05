@@ -117,8 +117,8 @@ class StructuredLogger:
         query: str,
         retrieved_docs: list[Document],
         response_time: float,
-        retrieval_time: float,
-        generation_time: float,
+        retrieval_time: float = 0.0,
+        generation_time: float = 0.0,
         user_id: str | None = None,
     ) -> None:
         """Log a query with retrieved documents and response time.
@@ -127,6 +127,8 @@ class StructuredLogger:
             query: User query string.
             retrieved_docs: List of retrieved documents.
             response_time: Response time in seconds.
+            retrieval_time: Optional retrieval time in seconds.
+            generation_time: Optional generation time in seconds.
             user_id: Optional user identifier.
         """
         log_data = {
@@ -134,10 +136,12 @@ class StructuredLogger:
             "query": query,
             "num_documents": len(retrieved_docs),
             "response_time_seconds": response_time,
-            "retrieval_time_seconds": retrieval_time,
-            "generation_time_seconds": generation_time,
         }
 
+        if retrieval_time:
+            log_data["retrieval_time_seconds"] = retrieval_time
+        if generation_time:
+            log_data["generation_time_seconds"] = generation_time
         if user_id:
             log_data["user_id"] = user_id
 
