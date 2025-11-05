@@ -7,6 +7,8 @@ This package provides the foundational components for document processing and re
 - Retrieval engines with advanced features (RetrievalEngine, AdvancedRetriever, Reranker)
 """
 
+import core.huggingface_manager  # noqa: F401
+
 from .chunking import ChunkingStrategy, MetadataAwareChunker, TextChunker
 from .embeddings import EmbeddingModel, get_embeddings
 from .retrieval import (

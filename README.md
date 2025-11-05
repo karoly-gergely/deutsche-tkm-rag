@@ -210,6 +210,13 @@ All backend configuration is managed through environment variables. See `.env.ex
 - `LOG_LEVEL`: Logging level (default: `INFO`)
 - `ENABLE_TRACING`: Enable OpenTelemetry tracing (default: `false`)
 - `LOG_DIR`: Log directory (default: `logs`)
+- `HF_TOKEN`: HuggingFace Hub access token for authenticated model access (optional)
+  - Required for accessing private/gated models on HuggingFace Hub
+  - Required for models with download restrictions
+  - Provides higher rate limits for model downloads
+  - Get your token from: https://huggingface.co/settings/tokens
+  - The token is automatically used for authentication when the core module is imported
+  - If not set, the application will work with public models only
 
 ### React Frontend Configuration
 

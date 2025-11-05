@@ -78,6 +78,8 @@ class Settings(BaseSettings):
 
     RERANKER_MODEL: str | None = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
+    HF_TOKEN: str | None = None
+
     class Config:
         env_file = ".env"
         case_sensitive = False
