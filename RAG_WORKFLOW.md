@@ -511,7 +511,7 @@ This ensures **consistent developer experience** and **standardized workflows**.
 - Requires manual ingestion (via shell access to the container)  
 - Intended for iterative local development and debugging
 
-### Staging Environment (`docker-compose.staging.yml`)
+### Staging Environment (`docker-compose.yml`)
 - Targets **GPU-backed systems** (e.g., NVIDIA T4 or higher)  
 - Includes an additional **worker container** dedicated to rebuilding Chroma indexes  
 - Allows dataset updates without downtime in API/UI services  

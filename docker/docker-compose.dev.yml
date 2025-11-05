@@ -1,8 +1,6 @@
 version: "3.9"
 
 # Development configuration (CPU-only, no GPU)
-# Standalone file - does not merge with base docker-compose.yml
-# Usage: docker-compose -f docker/docker-compose.dev.yml up --build
 
 services:
   rag-ui:
@@ -11,7 +9,7 @@ services:
       dockerfile: docker/Dockerfile.dev
     container_name: deutsche-rag-ui-dev
     hostname: deutsche-rag-ui-dev
-    command: poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    # command: poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8501:8501"
     env_file:
@@ -23,9 +21,6 @@ services:
       - ../data:/app/data
       - ../.chroma:/app/.chroma
       - ../logs:/app/logs
-    # Explicitly remove GPU requirements by setting empty deploy section
-    deploy:
-      resources: {}
     # Streamlit auto-reloads on file changes
     restart: unless-stopped
 
@@ -47,9 +42,6 @@ services:
       - ../data:/app/data
       - ../.chroma:/app/.chroma
       - ../logs:/app/logs
-    # Explicitly remove GPU requirements by setting empty deploy section
-    deploy:
-      resources: {}
     depends_on:
       - rag-ui
     # FastAPI --reload enables auto-reload on file changes

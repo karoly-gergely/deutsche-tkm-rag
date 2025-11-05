@@ -9,15 +9,20 @@ ENV POETRY_VERSION=1.8.3 \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_NO_INTERACTION=1 \
     PYTHONUNBUFFERED=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache \
-    PYTHONPATH=/app
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml ./
 
-RUN poetry install --no-ansi --with dev && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --no-root --no-ansi --with dev && rm -rf $POETRY_CACHE_DIR
 
 COPY . .
+
+RUN rm -f poetry.lock
+
+# Install the project package (enables imports without PYTHONPATH)
+# --only-root because dependencies were already installed above
+RUN poetry install --only-root --no-ansi
 
 EXPOSE 8501 8080

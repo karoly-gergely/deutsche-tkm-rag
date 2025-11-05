@@ -4,6 +4,7 @@ and retrieval within the RAG service. Integrates with ChromaDB and
 the HuggingFace language model layer for response generation.
 """
 
+import logging
 import time
 from contextlib import asynccontextmanager
 
@@ -24,6 +25,10 @@ from llm.generation import generate_response
 from monitoring.metrics import get_metrics_registry
 from monitoring.tracing import get_tracer, setup_tracing
 
+
+logger = logging.getLogger(__name__)
+
+
 # Initialize tracing
 setup_tracing()
 
@@ -31,7 +36,6 @@ setup_tracing()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handle warm-up on startup."""
-    logger = get_logger()
     logger.info("Warming up components...")
     get_tokenizer()
     get_model()

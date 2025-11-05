@@ -61,3 +61,10 @@ Thumbs.db
 .coverage
 htmlcov/
 tests/
+
+# Docker files
+docker/*
+!docker/entrypoint.sh
+
+# React project
+react/

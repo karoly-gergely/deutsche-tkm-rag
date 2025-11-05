@@ -14,6 +14,7 @@ from core.embeddings import get_embeddings
 from core.utils.imports import import_langchain_chroma
 from loaders.loader import DocumentLoader
 from monitoring.logging import setup_logging
+from langchain_community.vectorstores.utils import filter_complex_metadata
 
 Chroma = import_langchain_chroma()
 logger = setup_logging()
@@ -98,13 +99,17 @@ def main():
 
         logger.info(f"Created {len(all_chunks)} chunk(s)")
 
+        # Filter complex metadata (lists, dicts, etc.) that ChromaDB doesn't support
+        logger.info("Filtering complex metadata for ChromaDB compatibility")
+        filtered_chunks = filter_complex_metadata(all_chunks)
+
         # Get embeddings
         embeddings = get_embeddings()
 
         # Build or load Chroma vectordb
         logger.info(f"Building ChromaDB vector store at {chroma_dir}")
         vectordb = Chroma.from_documents(
-            documents=all_chunks,
+            documents=filtered_chunks,
             embedding=embeddings,
             persist_directory=chroma_dir,
         )
@@ -116,7 +121,7 @@ def main():
         # Print counts
         print("\n✓ Ingestion completed successfully!")
         print(f"  Documents: {len(documents)}")
-        print(f"  Chunks: {len(all_chunks)}")
+        print(f"  Chunks: {len(filtered_chunks)}")
         print(f"  Vector store: {chroma_dir}")
 
     except FileNotFoundError as e:

@@ -77,35 +77,15 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
    # Edit .env with your configuration
    ```
 
-4. **Set PYTHONPATH** (required for local development):
+4. **Install the project** (required for CLI commands):
    
-   The project requires `PYTHONPATH` to be set to the project root directory. This allows Python to find the project modules when running scripts directly.
-   
-   **Option A: Set in your shell profile** (recommended for persistent use):
-   
-   Add to `~/.zshrc` (or `~/.bashrc`):
-   ```bash
-   export PYTHONPATH="/path/to/project:$PYTHONPATH"
-   ```
-   
-   Replace `/path/to/project` with the absolute path to this project directory.
-   
-   **Option B: Set per-session**:
+   After installing dependencies, the project is automatically installed as a package. This enables Poetry CLI commands to work without `PYTHONPATH` configuration.
    
    ```bash
-   export PYTHONPATH="$(pwd)"
+   poetry install
    ```
    
-   **Option C: Use direnv** (automatically loads when entering directory):
-   
-   Install direnv, then create `.envrc` in the project root:
-   ```bash
-   export PYTHONPATH="$(pwd)"
-   ```
-   
-   Then run `direnv allow` in the project directory.
-   
-   **Note**: When using `make` commands, `PYTHONPATH` is automatically set. You only need to set it manually when running commands directly with `poetry run` or `python`.
+   This installs the project packages (`config`, `core`, `api`, etc.) and registers CLI entry points (`ingest`, `rebuild-index`, `dev-check`, etc.).
 
 5. **Set up React frontend** (optional):
    ```bash
@@ -121,16 +101,16 @@ Place your documents (TXT files) in the `data/` folder, then run:
 make ingest
 ```
 
-Or using Poetry directly (ensure `PYTHONPATH` is set first):
+Or using Poetry CLI directly:
 
 ```bash
-PYTHONPATH="$(pwd)" poetry run python scripts/ingest.py
+poetry run ingest
 ```
 
 To specify a custom data folder:
 
 ```bash
-PYTHONPATH="$(pwd)" poetry run python scripts/ingest.py --data-folder /path/to/documents
+poetry run ingest --data-folder /path/to/documents
 ```
 
 ### Run the Streamlit UI
@@ -139,10 +119,10 @@ PYTHONPATH="$(pwd)" poetry run python scripts/ingest.py --data-folder /path/to/d
 make ui
 ```
 
-Or using Poetry directly (ensure `PYTHONPATH` is set first):
+Or using Poetry directly:
 
 ```bash
-PYTHONPATH="$(pwd)" poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
 ```
 
 The application will be available at `http://localhost:8501`
@@ -153,10 +133,10 @@ The application will be available at `http://localhost:8501`
 make api
 ```
 
-Or using Poetry directly (ensure `PYTHONPATH` is set first):
+Or using Poetry directly:
 
 ```bash
-PYTHONPATH="$(pwd)" poetry run uvicorn api.routes:app --reload --host 0.0.0.0 --port 8080
+poetry run uvicorn api.routes:app --reload --host 0.0.0.0 --port 8080
 ```
 
 API documentation will be available at `http://localhost:8080/docs`
@@ -239,9 +219,9 @@ Using Makefile:
 make test
 ```
 
-Or using Poetry directly (ensure `PYTHONPATH` is set first):
+Or using Poetry directly:
 ```bash
-PYTHONPATH="$(pwd)" poetry run pytest
+poetry run pytest
 ```
 
 ### Rebuilding the Index
@@ -253,9 +233,9 @@ Using Makefile:
 make rebuild-index-force
 ```
 
-Or using Poetry directly (ensure `PYTHONPATH` is set first):
+Or using Poetry CLI directly:
 ```bash
-PYTHONPATH="$(pwd)" poetry run python scripts/rebuild_index.py --force
+poetry run rebuild-index --force
 ```
 
 ## Docker
@@ -444,9 +424,9 @@ Please review individual model licenses before commercial deployment.
 ### Import Errors
 
 If you encounter import errors:
-1. Ensure `PYTHONPATH` is set to the project root directory (see Installation step 4)
-2. Ensure you're running from the project root
-3. Ensure the virtual environment is activated (or use `poetry run`)
+1. Ensure the project is installed: `poetry install` (installs project as package)
+2. Use Poetry CLI commands (`poetry run ingest`, `poetry run rebuild-index`, etc.)
+3. Ensure you're running from the project root
 4. Verify dependencies are installed: `poetry install`
 
 ### ChromaDB Issues

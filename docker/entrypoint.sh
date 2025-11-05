@@ -1,15 +1,12 @@
 #!/bin/bash
 set -e
 
-# Ensure PYTHONPATH is set (Poetry may not preserve it from Dockerfile ENV)
-export PYTHONPATH=/app
-
 # Run ingestion if ChromaDB needs it
-if poetry run python scripts/check_needs_ingestion.py; then
+if poetry run check-needs-ingestion; then
     echo "✓ Vector store already exists with data, skipping ingestion"
 else
     echo "📚 Running ingestion..."
-    poetry run python scripts/ingest.py
+    poetry run ingest
 fi
 
 # Start FastAPI backend

@@ -8,7 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     python3.11 python3.11-venv python3-pip \
-    && ln -s /usr/bin/python3.11 /usr/bin/python \
+    && python3.11 -m pip install --upgrade pip setuptools wheel \
+    && ln -sf $(which python3.11) /usr/local/bin/python \
+    && ln -sf $(which pip3) /usr/local/bin/pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
@@ -19,28 +21,33 @@ RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 ENV POETRY_VIRTUALENVS_CREATE=false \
     POETRY_NO_INTERACTION=1 \
     PYTHONUNBUFFERED=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache \
-    PYTHONPATH=/app
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # Build argument to control dev dependency installation
 ARG INSTALL_DEV_DEPS=false
 
 # Copy Poetry configuration files first for better layer caching
-COPY pyproject.toml poetry.lock* ./
-# poetry.lock is optional - if missing, Poetry will generate it during install
+COPY pyproject.toml ./
 
 # Install dependencies conditionally based on build arg
 # Production: --no-dev excludes dev dependencies
 # Development: includes dev dependencies (accelerate, etc.)
+# Use --no-root to skip installing the project itself (code is copied later)
 RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
-        poetry install --no-ansi; \
+        poetry install --no-root --no-ansi; \
     else \
-        poetry install --no-dev --no-ansi; \
+        poetry install --no-root --no-dev --no-ansi; \
     fi && \
     rm -rf $POETRY_CACHE_DIR
 
 # Copy application code
 COPY . .
+
+RUN rm -f poetry.lock
+
+# Install the project package (enables imports without PYTHONPATH)
+# --only-root because dependencies were already installed above
+RUN poetry install --only-root --no-ansi
 
 ## SSL
 RUN mkdir -p /app/certs && \

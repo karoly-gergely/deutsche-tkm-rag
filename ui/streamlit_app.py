@@ -63,7 +63,7 @@ def initialize_system():
             "```\n"
             "Or:\n"
             "```bash\n"
-            "poetry run python scripts/ingest.py\n"
+            "poetry run ingest\n"
             "```"
         )
         st.stop()

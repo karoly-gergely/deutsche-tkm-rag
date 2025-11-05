@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Retrieval-Augmented Generation assistant for Deutsche Telekom press releases"
 authors = ["Karoly Gergely <karolygergely86@gmail.com>"]
 readme = "README.md"
-packages = [{include = "config"}, {include = "core"}, {include = "loaders"}, {include = "llm"}, {include = "monitoring"}, {include = "api"}, {include = "ui"}, {include = "scripts"}, {include = "tests"}]
+packages = [{include = "config"}, {include = "core"}, {include = "loaders"}, {include = "llm"}, {include = "monitoring"}, {include = "api"}, {include = "ui"}, {include = "scripts"}]
 
 [tool.poetry.dependencies]
 accelerate = ">=0.30"
@@ -30,6 +30,12 @@ pytest = ">=8.3"
 ruff = "*"
 black = "*"
 isort = "*"
+
+[tool.poetry.scripts]
+check-needs-ingestion = "scripts.check_needs_ingestion:main"
+ingest = "scripts.ingest:main"
+rebuild-index = "scripts.rebuild_index:main"
+dev-check = "scripts.dev_check:main"
 
 [tool.black]
 line-length = 79

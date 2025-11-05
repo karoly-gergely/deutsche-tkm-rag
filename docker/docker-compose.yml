@@ -72,7 +72,7 @@ services:
       args:
         INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-worker
-    command: poetry run python scripts/rebuild_index.py --force
+    command: poetry run rebuild-index --force
     env_file:
       - ../.env
     volumes:

@@ -117,6 +117,8 @@ class StructuredLogger:
         query: str,
         retrieved_docs: list[Document],
         response_time: float,
+        retrieval_time: float,
+        generation_time: float,
         user_id: str | None = None,
     ) -> None:
         """Log a query with retrieved documents and response time.
@@ -132,6 +134,8 @@ class StructuredLogger:
             "query": query,
             "num_documents": len(retrieved_docs),
             "response_time_seconds": response_time,
+            "retrieval_time_seconds": retrieval_time,
+            "generation_time_seconds": generation_time,
         }
 
         if user_id:

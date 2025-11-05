@@ -110,7 +110,7 @@ def print_chroma_status():
     else:
         print(f"❌ ChromaDB directory does not exist: {chroma_dir}")
         print(
-            "   Run 'make ingest' or 'python scripts/ingest.py' to create index"
+            "   Run 'make ingest' or 'poetry run ingest' to create index"
         )
 
     print()

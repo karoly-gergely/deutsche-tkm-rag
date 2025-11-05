@@ -46,8 +46,13 @@ def needs_ingestion() -> bool:
         return True
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for Poetry CLI command."""
     if needs_ingestion():
         sys.exit(1)  # Needs ingestion
     else:
         sys.exit(0)  # Doesn't need ingestion
+
+
+if __name__ == "__main__":
+    main()

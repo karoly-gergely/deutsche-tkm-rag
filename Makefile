@@ -95,29 +95,26 @@ deps-lock:
 # Project management commands
 # ==========================================================
 
-# Get the project root directory for PYTHONPATH
-PROJECT_ROOT := $(shell pwd)
-
 setup:
 	cp .env.example .env
 
 ingest:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run python scripts/ingest.py
+	poetry run ingest
 
 rebuild-index:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run python scripts/rebuild_index.py
+	poetry run rebuild-index
 
 rebuild-index-force:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run python scripts/rebuild_index.py --force
+	poetry run rebuild-index --force
 
 ui:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+	poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
 
 api:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 --reload
+	poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 --reload
 
 test:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run pytest -q
+	poetry run pytest -q
 
 fmt:
 	poetry run ruff check --fix .
@@ -128,7 +125,7 @@ lint:
 	poetry run ruff check .
 
 dev-check:
-	PYTHONPATH=$(PROJECT_ROOT) poetry run python scripts/dev_check.py
+	poetry run dev-check
 
 # ==========================================================
 # Health & monitoring
