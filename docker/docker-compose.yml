@@ -39,7 +39,7 @@ services:
       args:
         INSTALL_DEV_DEPS: "false"
     container_name: deutsche-rag-api
-    command: poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080
+    command: poetry run uvicorn api:app --host 0.0.0.0 --port 8080
     ports:
       - "8080:8080"
     env_file:

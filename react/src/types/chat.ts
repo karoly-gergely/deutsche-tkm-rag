@@ -8,6 +8,7 @@ export interface Message {
 export interface QueryRequest {
   query: string;
   top_k?: number;
+  messages?: Message[];
 }
 
 export interface QueryResponse {

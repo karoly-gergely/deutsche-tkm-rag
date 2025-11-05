@@ -111,7 +111,7 @@ ui:
 	poetry run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
 
 api:
-	poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 --reload
+	poetry run uvicorn api:app --host 0.0.0.0 --port 8080 --reload
 
 test:
 	poetry run pytest -q

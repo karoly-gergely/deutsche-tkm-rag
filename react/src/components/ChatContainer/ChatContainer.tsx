@@ -33,7 +33,17 @@ export const ChatContainer = () => {
       setError(null);
 
       try {
-        const response = await sendQuery({ query: content });
+        const conversationHistory = messages
+          .filter((msg) => msg.role === "user" || msg.role === "assistant")
+          .map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          }));
+        
+        const response = await sendQuery({ 
+          query: content,
+          messages: conversationHistory.length > 0 ? conversationHistory : undefined,
+        });
 
         const assistantMessage: Message = {
           role: "assistant",

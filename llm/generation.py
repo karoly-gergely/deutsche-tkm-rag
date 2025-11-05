@@ -78,12 +78,62 @@ def generate_response(
             pad_token_id=tokenizer.eos_token_id,
         )
 
-    # Decode and strip special tokens
-    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Extract only the newly generated tokens (not the input prompt)
+    input_length = inputs["input_ids"].shape[1]
+    generated_ids = outputs[0][input_length:]
 
-    # Remove prompt from output if present
-    if generated_text.startswith(prompt):
-        generated_text = generated_text[len(prompt) :].strip()
+    # Decode only the newly generated tokens
+    generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
+
+    # If the model generated text that looks like it's repeating the prompt structure,
+    # filter it out. Look for patterns like "system\n", "user\n", "assistant\n" at the start
+    lines = generated_text.split("\n")
+    cleaned_lines = []
+    in_assistant_response = False
+
+    for line in lines:
+        # Remove any special token markers from the line
+        line = line.replace("<|im_start|>", "").replace("<|im_end|>", "")
+        line_stripped = line.strip()
+        if not line_stripped:
+            if in_assistant_response:
+                cleaned_lines.append("")
+            continue
+
+        # Skip role markers
+        if line_stripped.lower() in ("system", "user", "assistant"):
+            if line_stripped.lower() == "assistant":
+                in_assistant_response = True
+            continue
+
+        # Skip lines that start with role markers followed by colon or content
+        if ":" in line_stripped:
+            role_prefix = line_stripped.split(":")[0].strip().lower()
+            if role_prefix in ("system", "user", "assistant"):
+                # If it's assistant, take the content after the colon
+                if role_prefix == "assistant":
+                    content = ":".join(line_stripped.split(":")[1:]).strip()
+                    if content:
+                        cleaned_lines.append(content)
+                        in_assistant_response = True
+                continue
+
+        # If we've seen assistant marker or are in response, include the line
+        if in_assistant_response or not any(
+            keyword in line_stripped.lower()
+            for keyword in [
+                "you are",
+                "guidelines",
+                "remember:",
+                "query:",
+                "context documents",
+            ]
+        ):
+            cleaned_lines.append(line)
+            in_assistant_response = True
+
+    if cleaned_lines:
+        generated_text = "\n".join(cleaned_lines).strip()
 
     return generated_text
 
@@ -186,12 +236,17 @@ def generate_response_streaming(
                 pad_token_id=tokenizer.eos_token_id,
             )
 
-        # Decode full output
-        generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        # Extract only the newly generated tokens (not the input prompt)
+        input_length = inputs["input_ids"].shape[1]
+        generated_ids = outputs[0][input_length:]
 
-        # Remove prompt from output if present
-        if generated_text.startswith(prompt):
-            generated_text = generated_text[len(prompt) :].strip()
+        # Decode only the newly generated tokens
+        generated_text = tokenizer.decode(
+            generated_ids, skip_special_tokens=True
+        )
+
+        # Clean up: remove any end markers and trailing whitespace
+        generated_text = generated_text.replace("<|im_end|>", "").strip()
 
         # Simulate streaming by yielding in small chunks
         chunk_size = 5  # characters per chunk

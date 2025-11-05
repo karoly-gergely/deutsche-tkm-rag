@@ -228,13 +228,13 @@ def main():
                 # Build prompt
                 status_bar.info("📝 Building prompt...")
                 chat_history = [
-                    f"{msg['role']}: {msg['content']}"
+                    f"<|im_start|>{msg['role']}\n{msg['content']}<|im_end|>"
                     for msg in st.session_state.messages[:-1]
                 ]
                 prompt = prompt_manager.build_rag_prompt(
                     query=user_query,
                     context_docs=retrieved_docs,
-                    chat_history=chat_history,
+                    chat_history=chat_history if chat_history else None,
                 )
 
                 # Generate response with streaming

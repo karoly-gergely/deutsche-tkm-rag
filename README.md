@@ -97,6 +97,13 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
    make react-setup    # Creates .env file in react/ directory
    make react-install  # Installs pnpm and React dependencies
    ```
+   
+   Or run directly (from 'react' folder):
+   ```bash
+   cp .env.example .env                # Creates .env file in react/ directory
+   npm install -g pnpm                 # Install pnpm globally
+   pnpm install                        # Install React dependencies
+   ```
 
 ### Ingest Documents
 
@@ -141,7 +148,7 @@ make api
 Or using Poetry directly:
 
 ```bash
-poetry run uvicorn api.routes:app --reload --host 0.0.0.0 --port 8080
+poetry run uvicorn api:app --reload --host 0.0.0.0 --port 8080
 ```
 
 API documentation will be available at `http://localhost:8080/docs`
@@ -152,12 +159,32 @@ API documentation will be available at `http://localhost:8080/docs`
 make react-dev
 ```
 
+Or run directly (from 'react' folder):
+```bash
+pnpm dev
+```
+
 The React application will be available at `http://localhost:5173`
 
 Other React commands:
 - `make react-build` - Build for production
+  
+  Or run directly (from 'react' folder):
+  ```bash
+  pnpm build
+  ```
 - `make react-lint` - Run linting
+  
+  Or run directly (from 'react' folder):
+  ```bash
+  pnpm lint
+  ```
 - `make react-preview` - Preview production build
+  
+  Or run directly (from 'react' folder):
+  ```bash
+  pnpm preview
+  ```
 
 ## Configuration
 

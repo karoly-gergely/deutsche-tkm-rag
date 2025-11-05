@@ -6,13 +6,12 @@ the HuggingFace language model layer for response generation.
 
 import logging
 import time
-from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from fastapi import HTTPException
 
-from api.dependencies import (
+from api.app import app
+from api.schemas import HealthResponse, QueryRequest, QueryResponse
+from api.utils.dependencies import (
     get_logger,
     get_model,
     get_prompt_manager,
@@ -23,82 +22,8 @@ from api.dependencies import (
 from config import IS_DEV, settings
 from llm.generation import generate_response
 from monitoring.metrics import get_metrics_registry
-from monitoring.tracing import get_tracer, setup_tracing
 
 logger = logging.getLogger(__name__)
-
-
-# Initialize tracing
-setup_tracing()
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Handle warm-up on startup."""
-    logger.info("Warming up components...")
-    get_tokenizer()
-    get_model()
-    get_vectordb()
-    get_retriever()
-    get_prompt_manager()
-    logger.info("✅ Warm-up complete")
-
-    yield
-
-
-# Create FastAPI app
-app = FastAPI(title="RAG Assistant API", version="1.0.0", lifespan=lifespan)
-
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# OpenTelemetry middleware if enabled
-if settings.ENABLE_TRACING:
-    tracer = get_tracer()
-    if tracer is not None:
-        try:
-            from opentelemetry.instrumentation.fastapi import (
-                FastAPIInstrumentor,
-            )
-
-            FastAPIInstrumentor.instrument_app(app)
-        except ImportError:
-            # OpenTelemetry FastAPI instrumentation not available
-            pass
-
-
-class QueryRequest(BaseModel):
-    """Request model for query endpoint."""
-
-    query: str = Field(
-        ..., min_length=1, max_length=1000, description="User query"
-    )
-    top_k: int | None = Field(
-        None,
-        ge=1,
-        le=20,
-        description="Number of documents to retrieve (clamped to 1-20)",
-    )
-
-
-class QueryResponse(BaseModel):
-    """Response model for query endpoint."""
-
-    answer: str
-    sources: list[str]
-
-
-class HealthResponse(BaseModel):
-    """Health check response."""
-
-    status: str
-    sizes: dict[str, int | None]
 
 
 @app.get("/health")
@@ -182,9 +107,21 @@ async def query(request: QueryRequest):
                 status_code=404, detail="No relevant documents found"
             )
 
+        # Build chat history from messages if provided
+        chat_history = None
+        if request.messages:
+            chat_history = []
+            for msg in request.messages:
+                formatted_msg = (
+                    f"<|im_start|>{msg.role}\n{msg.content}<|im_end|>"
+                )
+                chat_history.append(formatted_msg)
+
         # Build prompt
         prompt = prompt_manager.build_rag_prompt(
-            query=request.query, context_docs=retrieved_docs, chat_history=None
+            query=request.query,
+            context_docs=retrieved_docs,
+            chat_history=chat_history,
         )
 
         # Adaptive generation parameters based on dev mode

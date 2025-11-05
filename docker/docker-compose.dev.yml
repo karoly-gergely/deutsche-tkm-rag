@@ -30,7 +30,7 @@ services:
       dockerfile: docker/Dockerfile.dev
     container_name: deutsche-rag-api-dev
     hostname: deutsche-rag-api-dev
-    command: poetry run uvicorn api.routes:app --host 0.0.0.0 --port 8080 --reload
+    command: poetry run uvicorn api:app --host 0.0.0.0 --port 8080 --reload
     ports:
       - "8080:8080"
     env_file:
