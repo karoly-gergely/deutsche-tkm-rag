@@ -121,7 +121,7 @@ def measure_latency(name: str):
         print(f"Took {elapsed_ms()} ms")
     """
     start = time.perf_counter()
-    elapsed_ms = [0.0]  # Use list for mutability in nested scope
+    elapsed_ms: list[float] = [0.0]  # Use list for mutability in nested scope
 
     def get_elapsed():
         """Get elapsed time in milliseconds."""

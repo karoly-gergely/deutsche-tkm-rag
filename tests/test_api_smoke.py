@@ -101,7 +101,12 @@ def test_query_with_mocked_retriever_and_model():
 
         # Verify mocks were called
         mock_retriever.retrieve.assert_called_once()
+        # Verify build_rag_prompt was called with tokenizer
         mock_prompt_manager.build_rag_prompt.assert_called_once()
+        call_args = mock_prompt_manager.build_rag_prompt.call_args
+        assert (
+            "tokenizer" in call_args.kwargs or mock_tokenizer in call_args.args
+        )
         mock_generate.assert_called_once()
 
 

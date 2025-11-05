@@ -6,11 +6,17 @@ the HuggingFace language model layer for response generation.
 
 import logging
 import time
+from typing import Any
 
 from fastapi import HTTPException
 
 from api.app import app
-from api.schemas import HealthResponse, QueryRequest, QueryResponse
+from api.schemas import (
+    HealthResponse,
+    QueryRequest,
+    QueryResponse,
+    SettingsResponse,
+)
 from api.utils.dependencies import (
     get_logger,
     get_model,
@@ -35,10 +41,10 @@ async def health_simple():
 
 
 @app.get("/healthz", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """Health check endpoint with system sizes."""
-    sizes = {}
-    num_vectors = None
+    sizes: dict[str, int | None] = {}
+    num_vectors: int | None = None
 
     try:
         vectordb = get_vectordb()
@@ -59,7 +65,7 @@ async def health_check():
 
 
 @app.get("/metrics")
-async def metrics():
+async def metrics() -> dict[str, Any]:
     """Temporary metrics endpoint returning JSON counters.
 
     Returns:
@@ -67,7 +73,7 @@ async def metrics():
     """
     registry = get_metrics_registry()
     # Format for JSON response
-    result = {
+    result: dict[str, Any] = {
         "counters": registry.get("counters", {}),
         "timers": {
             name: {
@@ -82,8 +88,38 @@ async def metrics():
     return result
 
 
+@app.get("/settings", response_model=SettingsResponse)
+async def get_settings() -> SettingsResponse:
+    """Get current application settings.
+
+    Returns:
+        Current configuration settings including model IDs, generation parameters,
+        and system paths.
+    """
+    return SettingsResponse(
+        model_id=settings.MODEL_ID,
+        embedding_model=settings.EMBEDDING_MODEL,
+        device=settings.DEVICE,
+        chunk_size=settings.CHUNK_SIZE,
+        chunk_overlap=settings.CHUNK_OVERLAP,
+        top_k=settings.TOP_K,
+        rerank_top_k=settings.RERANK_TOP_K,
+        max_context_tokens=settings.MAX_CONTEXT_TOKENS,
+        max_new_tokens=settings.MAX_NEW_TOKENS,
+        temperature=settings.TEMPERATURE,
+        top_p=settings.TOP_P,
+        data_folder=settings.DATA_FOLDER,
+        chroma_dir=settings.CHROMA_DIR,
+        log_level=settings.LOG_LEVEL,
+        enable_tracing=settings.ENABLE_TRACING,
+        log_dir=settings.LOG_DIR,
+        reranker_model=settings.RERANKER_MODEL,
+        is_dev=IS_DEV,
+    )
+
+
 @app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest):
+async def query(request: QueryRequest) -> QueryResponse:
     """Query the RAG system."""
     logger = get_logger()
     start_time = time.time()
@@ -99,29 +135,35 @@ async def query(request: QueryRequest):
         top_k = request.top_k or settings.TOP_K
         top_k = max(1, min(20, top_k))  # Ensure it's in valid range
 
-        # Retrieve documents
-        retrieved_docs = retriever.retrieve(query=request.query, top_k=top_k)
+        # Determine rerank_top_k
+        rerank_top_k: int | None = settings.RERANK_TOP_K
+        if rerank_top_k is not None and rerank_top_k <= top_k:
+            rerank_top_k = None  # Disable reranking if not enough candidates
+
+        # Retrieve documents with reranking
+        retrieved_docs = retriever.retrieve(
+            query=request.query, top_k=top_k, rerank_top_k=rerank_top_k
+        )
 
         if not retrieved_docs:
             raise HTTPException(
                 status_code=404, detail="No relevant documents found"
             )
 
-        # Build chat history from messages if provided
-        chat_history = None
+        # Build chat history from messages if provided (convert to dict format)
+        chat_history: list[dict[str, str]] | None = None
         if request.messages:
-            chat_history = []
-            for msg in request.messages:
-                formatted_msg = (
-                    f"<|im_start|>{msg.role}\n{msg.content}<|im_end|>"
-                )
-                chat_history.append(formatted_msg)
+            chat_history = [
+                {"role": msg.role, "content": msg.content}
+                for msg in request.messages
+            ]
 
         # Build prompt
         prompt = prompt_manager.build_rag_prompt(
             query=request.query,
             context_docs=retrieved_docs,
             chat_history=chat_history,
+            tokenizer=tokenizer,
         )
 
         # Adaptive generation parameters based on dev mode
@@ -151,7 +193,7 @@ async def query(request: QueryRequest):
         answer = await run_in_threadpool(_generate)
 
         # Extract publication IDs from sources
-        publication_ids = []
+        publication_ids: list[str] = []
         for doc in retrieved_docs:
             pub_id = doc.metadata.get(
                 "publication_id", doc.metadata.get("doc_id", "unknown")

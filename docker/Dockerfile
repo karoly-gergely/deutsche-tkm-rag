@@ -7,12 +7,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
     curl \
-    python3.11 python3.11-venv python3-pip \
+    python3.10 python3.10-venv python3-pip python3.10-dev \
     gcc g++ \
-    && python3.11 -m pip install --upgrade pip setuptools wheel \
-    && ln -sf $(which python3.11) /usr/local/bin/python \
+    && python3.10 -m pip install --upgrade pip setuptools wheel \
+    && ln -sf $(which python3.10) /usr/local/bin/python \
     && ln -sf $(which pip3) /usr/local/bin/pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Fix bitsandbytes/triton linking error: "cannot find -lcuda"
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/lib/x86_64-linux-gnu/libcuda.so
 
 # Install Poetry
 ENV POETRY_VERSION=1.8.3

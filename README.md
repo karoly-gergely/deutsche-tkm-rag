@@ -37,7 +37,7 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
                            ▼
                   ┌──────────────────┐
                   │  LLM Generator   │
-                  │  (Qwen3-4B)      │
+                  │  (Gemma-2-9B)    │
                   └─────────┬────────┘
                             │
                             ▼
@@ -192,14 +192,14 @@ Other React commands:
 
 All backend configuration is managed through environment variables. See `.env.example` for available options:
 
-- `MODEL_ID`: LLM model identifier (default: `Qwen/Qwen3-4B-Instruct-2507`)
-- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: `Qwen/Qwen2.5-1.5B-Instruct`)
+- `MODEL_ID`: LLM model identifier (default: `google/gemma-2-9b-it`)
+- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: `google/gemma-2-2b-it`)
 - `EMBEDDING_MODEL`: Embedding model for vectorization (default: `intfloat/multilingual-e5-large`)
 - `DEVICE`: Device for model execution, `cuda` or `cpu` (default: `cuda`)
 - `DATA_FOLDER`: Path to documents folder (default: `data`)
 - `CHROMA_DIR`: ChromaDB persistence directory (default: `.chroma`)
-- `CHUNK_SIZE`: Text chunk size in characters (default: `500`)
-- `CHUNK_OVERLAP`: Overlap between chunks in characters (default: `100`)
+- `CHUNK_SIZE`: Text chunk size in characters (default: `800`)
+- `CHUNK_OVERLAP`: Overlap between chunks in characters (default: `150`)
 - `TOP_K`: Number of retrieved documents (default: `5`)
 - `RERANK_TOP_K`: Number of candidates for reranking (default: `10`)
 - `RERANKER_MODEL`: Reranker model identifier (default: `cross-encoder/ms-marco-MiniLM-L-6-v2`)
@@ -452,8 +452,8 @@ OpenTelemetry tracing is disabled by default. To enable:
 
 ### Model Licensing
 
-- **Qwen3-4B-Instruct-2507**: Apache 2.0 License (commercial use allowed)
-- **Qwen2.5-1.5B-Instruct**: Apache 2.0 License (commercial use allowed)
+- **Gemma-2-9B-IT**: Apache 2.0 License (commercial use allowed)
+- **Gemma-2-2B-IT**: Apache 2.0 License (commercial use allowed)
 - **intfloat/multilingual-e5-large**: Apache 2.0 License (commercial use allowed)
 - **cross-encoder/ms-marco-MiniLM-L-6-v2**: Apache 2.0 License (commercial use allowed)
 

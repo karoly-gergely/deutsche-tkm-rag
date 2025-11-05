@@ -4,6 +4,7 @@ Handles app creation, middleware setup, and lifespan management.
 """
 
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -27,7 +28,7 @@ setup_tracing()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Handle warm-up on startup."""
     logger.info("Warming up components...")
     get_tokenizer()

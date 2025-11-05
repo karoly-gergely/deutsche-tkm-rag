@@ -4,11 +4,13 @@ Configures OpenTelemetry instrumentation when enabled, supporting
 console export for development and extensible exporters for production.
 """
 
+from typing import Any
+
 from config import settings
 
 # Global tracer instance
-_tracer: object | None = None
-_tracer_provider = None
+_tracer: Any | None = None
+_tracer_provider: Any | None = None
 
 
 def setup_tracing() -> None:
@@ -55,7 +57,7 @@ def setup_tracing() -> None:
         _tracer_provider = None
 
 
-def get_tracer() -> object | None:
+def get_tracer() -> Any | None:
     """Get OpenTelemetry tracer instance.
 
     Returns:

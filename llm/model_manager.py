@@ -4,6 +4,8 @@ Handles model loading, quantization for development environments,
 and device configuration for CPU and GPU deployments.
 """
 
+from typing import Any
+
 from config import IS_DEV, settings
 
 
@@ -21,7 +23,7 @@ class ModelManager:
         else:
             self.model_id = model_id or settings.MODEL_ID
 
-    def load_model(self) -> tuple:
+    def load_model(self) -> tuple[Any, Any]:
         """Load tokenizer and model.
 
         Returns:

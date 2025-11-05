@@ -4,6 +4,8 @@ Wraps sentence-transformers models and provides LangChain-compatible
 embeddings for ChromaDB integration.
 """
 
+from typing import Any
+
 from sentence_transformers import SentenceTransformer
 
 from config import settings
@@ -48,7 +50,7 @@ class EmbeddingModel:
             self._model = SentenceTransformer(self.model_name)
         return self._model
 
-    def encode(self, texts: list[str], **kwargs) -> list[list[float]]:
+    def encode(self, texts: list[str], **kwargs: Any) -> list[list[float]]:
         """Encode texts into embeddings.
 
         Args:
@@ -60,7 +62,7 @@ class EmbeddingModel:
         """
         return self.model.encode(texts, **kwargs).tolist()
 
-    def encode_single(self, text: str, **kwargs) -> list[float]:
+    def encode_single(self, text: str, **kwargs: Any) -> list[float]:
         """Encode a single text into an embedding.
 
         Args:

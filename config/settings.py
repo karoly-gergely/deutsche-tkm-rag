@@ -41,18 +41,18 @@ IS_DEV = is_dev_environment()
 
 
 class Settings(BaseSettings):
-    MODEL_ID: str = "Qwen/Qwen3-4B-Instruct-2507"
+    MODEL_ID: str = "google/gemma-2-9b-it"
 
-    # DEV_MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct-GGUF" GGUF files are not Hugging Face Transformers checkpoints so can't be used with AutoModelForCausalLM.from_pretrained
-    DEV_MODEL_ID: str = "Qwen/Qwen2.5-1.5B-Instruct"
+    # Note: GGUF files are not Hugging Face Transformers checkpoints so can't be used with AutoModelForCausalLM.from_pretrained
+    DEV_MODEL_ID: str = "google/gemma-2-2b-it"
 
     EMBEDDING_MODEL: str = "intfloat/multilingual-e5-large"
 
     DEVICE: str = "cuda"  # cpu for dev purposes or non GPU-enabled machines
 
-    CHUNK_SIZE: int = 500
+    CHUNK_SIZE: int = 800
 
-    CHUNK_OVERLAP: int = 100
+    CHUNK_OVERLAP: int = 150
 
     TOP_K: int = 5
 

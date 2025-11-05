@@ -4,6 +4,8 @@ vector database, retriever, language model, and logging infrastructure.
 Ensures lazy initialization and shared state across API requests.
 """
 
+from typing import Any
+
 from config import settings
 from core.embeddings import get_embeddings
 from core.retrieval import AdvancedRetriever
@@ -15,15 +17,15 @@ from monitoring.logging import StructuredLogger
 Chroma = import_langchain_chroma()
 
 # Global singletons (lazy-loaded)
-_tokenizer: object | None = None
-_model: object | None = None
+_tokenizer: Any | None = None
+_model: Any | None = None
 _retriever: AdvancedRetriever | None = None
 _prompt_manager: PromptManager | None = None
 _logger: StructuredLogger | None = None
 _vectordb: Chroma | None = None
 
 
-def get_tokenizer():
+def get_tokenizer() -> Any:
     """Lazy-load tokenizer."""
     global _tokenizer, _model
     if _tokenizer is None:
@@ -32,7 +34,7 @@ def get_tokenizer():
     return _tokenizer
 
 
-def get_model():
+def get_model() -> Any:
     """Lazy-load model."""
     global _model
     if _model is None:
@@ -40,7 +42,7 @@ def get_model():
     return _model
 
 
-def get_vectordb():
+def get_vectordb() -> Chroma:
     """Lazy-load vector database."""
     global _vectordb
     if _vectordb is None:
@@ -52,7 +54,7 @@ def get_vectordb():
     return _vectordb
 
 
-def get_retriever():
+def get_retriever() -> AdvancedRetriever:
     """Lazy-load retriever."""
     global _retriever
     if _retriever is None:
@@ -63,7 +65,7 @@ def get_retriever():
     return _retriever
 
 
-def get_prompt_manager():
+def get_prompt_manager() -> PromptManager:
     """Lazy-load prompt manager."""
     global _prompt_manager
     if _prompt_manager is None:
@@ -71,7 +73,7 @@ def get_prompt_manager():
     return _prompt_manager
 
 
-def get_logger():
+def get_logger() -> StructuredLogger:
     """Lazy-load logger."""
     global _logger
     if _logger is None:

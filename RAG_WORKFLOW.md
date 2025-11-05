@@ -57,8 +57,8 @@ The RAG pipeline consists of several interconnected stages:
 - **Location**: `core/chunking.py`
 - **Strategy**: Metadata-Aware Chunking with RecursiveCharacterTextSplitter
 - **Parameters**:
-  - `chunk_size`: 500 characters (default)
-  - `chunk_overlap`: 100 characters (default)
+  - `chunk_size`: 800 characters (default)
+  - `chunk_overlap`: 150 characters (default)
   - Separators: `["\n\n", "\n", ". ", " ", ""]` (hierarchical splitting)
 
 **Chunking Process**:
@@ -237,7 +237,7 @@ top_results = [candidates[i] for i in indices[:top_k]]
 - **Location**: `llm/prompt_manager.py`
 - **Process**:
   1. Formats retrieved documents with publication IDs
-  2. Includes excerpts (first ~500 characters) for context
+  2. Includes excerpts (first ~800 characters) for context
   3. Numbers sources for citation
 
 **Context Block Format**:
@@ -250,7 +250,7 @@ top_results = [candidates[i] for i in indices[:top_k]]
 ```
 
 #### 6.2 Prompt Construction
-- **Template**: Qwen instruction format (`<|im_start|>` tokens)
+- **Template**: Hugging Face chat template (LLaMA/Gemma/Mistral compatible)
 - **Components**:
   1. System prompt (Deutsche Telekom assistant role)
   2. Few-shot examples (safe behavior, citation requirements)
@@ -259,20 +259,14 @@ top_results = [candidates[i] for i in indices[:top_k]]
   5. Assistant response start token
 
 **Prompt Structure**:
-```
-<|im_start|>system
-You are an enterprise assistant for Deutsche Telekom...
-<|im_end|>
-<|im_start|>user
-Query: [user question]
+The prompt is built using Hugging Face's `apply_chat_template()` method, which generates a model-specific format. The message structure follows this pattern:
+- System message with instructions
+- Few-shot behavioral examples (user/assistant pairs)
+- Chat history (if available)
+- Current user query with context documents
+- Assistant response generation prompt
 
-Context documents:
-1. [Publication ID: doc_001]
-   [excerpt]
-...
-<|im_end|>
-<|im_start|>assistant
-```
+The tokenizer automatically formats messages according to the model's chat template (e.g., Gemma 2 uses its own chat template format compatible with Hugging Face's chat template system).
 
 ---
 
@@ -280,7 +274,7 @@ Context documents:
 
 #### 7.1 Model Loading
 - **Location**: `llm/model_manager.py`
-- **Model**: `Qwen/Qwen3-4B-Instruct-2507` (production) or `Qwen/Qwen2.5-1.5B-Instruct` (dev)
+- **Model**: `google/gemma-2-9b-it` (production) or `google/gemma-2-2b-it` (dev)
 - **Configuration**:
   - **Dev Mode**: Quantized (int8) for CPU efficiency
   - **Production**: Full precision on GPU, float16 on CUDA
@@ -349,8 +343,8 @@ Context documents:
 ## Configuration Parameters
 
 ### Chunking
-- `CHUNK_SIZE`: 500 characters
-- `CHUNK_OVERLAP`: 100 characters
+- `CHUNK_SIZE`: 800 characters
+- `CHUNK_OVERLAP`: 150 characters
 
 ### Retrieval
 - `TOP_K`: 5 (final results)
@@ -360,6 +354,75 @@ Context documents:
 ### Embeddings
 - `EMBEDDING_MODEL`: "intfloat/multilingual-e5-large"
 - Dimensions: 1024
+
+---
+
+## Optimization and Model Iteration
+
+Throughout the development of this RAG system, extensive experimentation has been conducted to improve response quality, naturalness, and user interaction experience. Multiple configurations have been tested across different dimensions:
+
+### Model Iterations
+
+The system has been evaluated with several model families to find the optimal balance between response quality, coherence, and computational efficiency. The following model pairs have been tested:
+
+1. **Qwen Family (Initial)**
+   - Production: `Qwen/Qwen2.5-3B-Instruct`
+   - Development: `Qwen/Qwen2.5-1.5B-Instruct`
+
+2. **Qwen Family (Enhanced)**
+   - Production: `Qwen/Qwen3-4B-Instruct-2507`
+   - Development: `Qwen/Qwen2.5-1.5B-Instruct`
+
+3. **Meta LLaMA Family**
+   - Production: `meta-llama/Meta-Llama-3-8B-Instruct`
+   - Development: `meta-llama/Meta-Llama-3-1B-Instruct`
+
+4. **Google Gemma Family (Current)**
+   - Production: `google/gemma-2-9b-it`
+   - Development: `google/gemma-2-2b-it`
+
+### Chunking Parameter Optimization
+
+Chunking parameters have been adjusted to improve context retrieval and response quality:
+
+- **CHUNK_SIZE**: Experimented with values from 500 to 800 characters
+  - Initial: 500 characters
+  - Current: 800 characters (provides more context per chunk)
+  
+- **CHUNK_OVERLAP**: Adjusted to maintain context continuity
+  - Initial: 100 characters
+  - Current: 150 characters (better overlap ratio for larger chunks)
+
+The larger chunk size and increased overlap were found to provide more comprehensive context to the language model, enabling more coherent and informative responses.
+
+### Generation Parameter Tuning
+
+Temperature and top_p parameters have been fine-tuned to balance creativity with consistency:
+
+- **TEMPERATURE**: Maintained at 0.6 (production) - after several attempt at lower values - for balanced creativity and consistency
+- **TOP_P**: Adjusted from 0.95 to 0.9 to reduce randomness while maintaining natural language flow
+- **MAX_CONTEXT_TOKENS**: Increased from 2000 to 6000 to allow more comprehensive context from retrieved documents, enabling richer and more detailed responses
+
+These settings were optimized to produce responses that are both informative and natural-sounding, avoiding overly formal or robotic language while maintaining factual accuracy.
+
+### Prompt Engineering Evolution
+
+The prompt construction approach has evolved from model-specific formatting (Qwen-style `<|im_start|>` tokens) to a universal Hugging Face chat template system. This change:
+
+- Enables compatibility across multiple model families (LLaMA, Gemma, Mistral)
+- Leverages native tokenizer chat templates for optimal formatting
+- Provides consistent behavior regardless of the underlying model architecture
+
+### Response Quality Improvements
+
+The iterative optimization process has focused on:
+
+- **Naturalness**: Making responses sound more conversational and less structured
+- **Coherence**: Ensuring responses flow naturally and synthesize information effectively
+- **Completeness**: Providing comprehensive answers that fully address user queries
+- **Friendliness**: Creating a warm, engaging interaction experience while maintaining professionalism
+
+Current configuration (Gemma-2-9B with chunk size 800, overlap 150, temperature 0.6, top_p 0.9) represents the culmination of these optimization efforts, providing the best balance of response quality, naturalness, and user experience.
 
 ---
 
@@ -510,12 +573,13 @@ This ensures **consistent developer experience** and **standardized workflows**.
 - Runs inference on **CPU** (optimized for compatibility, not performance)  
 - Requires manual ingestion (via shell access to the container)  
 - Intended for iterative local development and debugging
+- Recommended specs: ≥6 CPU cores, ≥15GB RAM (≥8GB if using dtype float16)
 
 ### Staging Environment (`docker-compose.yml`)
 - Targets **GPU-backed systems** (e.g., NVIDIA T4 or higher)  
 - Includes an additional **worker container** dedicated to rebuilding Chroma indexes  
 - Allows dataset updates without downtime in API/UI services  
-- Recommended GPU specs: ≥12GB VRAM, CUDA 12.x+
+- Recommended GPU specs: ≥14GB VRAM, CUDA 12.x+
 
 ### Notes
 - Staging environment can also run locally on compatible hardware  

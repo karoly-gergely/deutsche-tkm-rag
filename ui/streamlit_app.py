@@ -6,6 +6,7 @@ attribution, and configurable retrieval parameters for end users.
 
 import time
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
 
@@ -34,7 +35,7 @@ st.set_page_config(
 
 
 @st.cache_resource
-def initialize_system():
+def initialize_system() -> dict[str, Any]:
     """Initialize system components with caching.
 
     Returns:
@@ -227,14 +228,18 @@ def main():
 
                 # Build prompt
                 status_bar.info("📝 Building prompt...")
-                chat_history = [
-                    f"<|im_start|>{msg['role']}\n{msg['content']}<|im_end|>"
-                    for msg in st.session_state.messages[:-1]
-                ]
+                # Convert chat history to dict format (exclude current message)
+                chat_history: list[dict[str, str]] | None = None
+                if len(st.session_state.messages) > 1:
+                    chat_history = [
+                        {"role": msg["role"], "content": msg["content"]}
+                        for msg in st.session_state.messages[:-1]
+                    ]
                 prompt = prompt_manager.build_rag_prompt(
                     query=user_query,
                     context_docs=retrieved_docs,
-                    chat_history=chat_history if chat_history else None,
+                    chat_history=chat_history,
+                    tokenizer=tokenizer,
                 )
 
                 # Generate response with streaming
@@ -296,7 +301,7 @@ def main():
                 total_time = time.time() - start_time
 
                 # Extract publication IDs from sources
-                publication_ids = []
+                publication_ids: list[str] = []
                 for doc in retrieved_docs:
                     pub_id = doc.metadata.get(
                         "publication_id", doc.metadata.get("doc_id", "unknown")
