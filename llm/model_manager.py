@@ -55,15 +55,17 @@ class ModelManager:
                 model, {torch.nn.Linear}, dtype=torch.qint8
             )
         elif settings.DEVICE != "cpu":
-            from transformers import BitsAndBytesConfig
+            # from transformers import BitsAndBytesConfig
 
             print("[PROD MODE] Using full model configuration with GPU")
-            bnb_config = BitsAndBytesConfig(load_in_8bit=True)
+            # bnb_config = BitsAndBytesConfig(load_in_8bit=True)
             model = AutoModelForCausalLM.from_pretrained(
                 self.model_id,
                 trust_remote_code=True,
-                quantization_config=bnb_config,
-                dtype=(torch.float16 if torch.cuda.is_available() else "auto"),
+                # quantization_config=bnb_config,
+                dtype=(
+                    torch.bfloat16 if torch.cuda.is_available() else "auto"
+                ),
                 device_map="cuda" if torch.cuda.is_available() else "auto",
             )
         else:
@@ -72,6 +74,7 @@ class ModelManager:
                 self.model_id,
                 trust_remote_code=True,
                 dtype="auto",
+                device_map="cpu",
             )
 
         # Enable pad_token_id for generation

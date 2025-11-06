@@ -41,10 +41,10 @@ IS_DEV = is_dev_environment()
 
 
 class Settings(BaseSettings):
-    MODEL_ID: str = "google/gemma-2-9b-it"
+    MODEL_ID: str = "google/gemma-3-4b-it"
 
     # Note: GGUF files are not Hugging Face Transformers checkpoints so can't be used with AutoModelForCausalLM.from_pretrained
-    DEV_MODEL_ID: str = "google/gemma-2-2b-it"
+    DEV_MODEL_ID: str = "google/gemma-3-1b-it"
 
     EMBEDDING_MODEL: str = "intfloat/multilingual-e5-large"
 

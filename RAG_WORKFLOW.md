@@ -274,7 +274,7 @@ The tokenizer automatically formats messages according to the model's chat templ
 
 #### 7.1 Model Loading
 - **Location**: `llm/model_manager.py`
-- **Model**: `google/gemma-2-9b-it` (production) or `google/gemma-2-2b-it` (dev)
+- **Model**: `google/gemma-3-4b-it` (production) or `google/gemma-3-1b-it` (dev)
 - **Configuration**:
   - **Dev Mode**: Quantized (int8) for CPU efficiency
   - **Production**: Full precision on GPU, float16 on CUDA
@@ -377,9 +377,13 @@ The system has been evaluated with several model families to find the optimal ba
    - Production: `meta-llama/Meta-Llama-3-8B-Instruct`
    - Development: `meta-llama/Meta-Llama-3-1B-Instruct`
 
-4. **Google Gemma Family (Current)**
+4. **Google Gemma-2 Family**
    - Production: `google/gemma-2-9b-it`
    - Development: `google/gemma-2-2b-it`
+
+5. **Google Gemma-3 Family (Current)**
+   - Production: `google/gemma-3-4b-it`
+   - Development: `google/gemma-3-1b-it`
 
 ### Chunking Parameter Optimization
 
@@ -422,7 +426,7 @@ The iterative optimization process has focused on:
 - **Completeness**: Providing comprehensive answers that fully address user queries
 - **Friendliness**: Creating a warm, engaging interaction experience while maintaining professionalism
 
-Current configuration (Gemma-2-9B with chunk size 800, overlap 150, temperature 0.6, top_p 0.9) represents the culmination of these optimization efforts, providing the best balance of response quality, naturalness, and user experience.
+Current configuration (Gemma-3-4B with chunk size 800, overlap 150, temperature 0.6, top_p 0.9) represents the culmination of these optimization efforts, providing the best balance of response quality, naturalness, and user experience. The migration from Gemma-2 to Gemma-3 models provides improved performance and efficiency while maintaining the same high-quality response characteristics but also utilising less resources than the previous generation.
 
 ---
 
@@ -573,7 +577,7 @@ This ensures **consistent developer experience** and **standardized workflows**.
 - Runs inference on **CPU** (optimized for compatibility, not performance)  
 - Requires manual ingestion (via shell access to the container)  
 - Intended for iterative local development and debugging
-- Recommended specs: ≥6 CPU cores, ≥15GB RAM (≥8GB if using dtype float16)
+- Recommended specs: ≥6 CPU cores, ≥7GB RAM (≥5GB if using dtype float16)
 
 ### Staging Environment (`docker-compose.yml`)
 - Targets **GPU-backed systems** (e.g., NVIDIA T4 or higher)  

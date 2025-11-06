@@ -37,7 +37,7 @@ A production-ready Retrieval-Augmented Generation (RAG) system for building inte
                            ▼
                   ┌──────────────────┐
                   │  LLM Generator   │
-                  │  (Gemma-2-9B)    │
+                  │  (Gemma-3-4B)    │
                   └─────────┬────────┘
                             │
                             ▼
@@ -192,8 +192,8 @@ Other React commands:
 
 All backend configuration is managed through environment variables. See `.env.example` for available options:
 
-- `MODEL_ID`: LLM model identifier (default: `google/gemma-2-9b-it`)
-- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: `google/gemma-2-2b-it`)
+- `MODEL_ID`: LLM model identifier (default: `google/gemma-3-4b-it`)
+- `DEV_MODEL_ID`: LLM model identifier for running in DEV mode (default: `google/gemma-3-1b-it`)
 - `EMBEDDING_MODEL`: Embedding model for vectorization (default: `intfloat/multilingual-e5-large`)
 - `DEVICE`: Device for model execution, `cuda` or `cpu` (default: `cuda`)
 - `DATA_FOLDER`: Path to documents folder (default: `data`)
@@ -459,8 +459,8 @@ OpenTelemetry tracing is disabled by default. To enable:
 
 ### Model Licensing
 
-- **Gemma-2-9B-IT**: Apache 2.0 License (commercial use allowed)
-- **Gemma-2-2B-IT**: Apache 2.0 License (commercial use allowed)
+- **Gemma-3-4B-IT**: Apache 2.0 License (commercial use allowed)
+- **Gemma-3-1B-IT**: Apache 2.0 License (commercial use allowed)
 - **intfloat/multilingual-e5-large**: Apache 2.0 License (commercial use allowed)
 - **cross-encoder/ms-marco-MiniLM-L-6-v2**: Apache 2.0 License (commercial use allowed)
 
